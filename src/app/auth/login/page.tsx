@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,30 +15,18 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // When Supabase is connected, this will use the real auth client
-      // For now, redirect to dashboard for demo purposes
-      const { createBrowserClient } = await import("@supabase/ssr");
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-      );
+      const supabase = createClient();
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (authError) {
-        // In demo mode without Supabase, allow access
-        if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-          window.location.href = "/dashboard";
-          return;
-        }
         setError(authError.message);
       } else {
         window.location.href = "/dashboard";
       }
-    } catch {
-      // If Supabase isn't configured, just redirect for demo
-      window.location.href = "/dashboard";
+    } catch (err) {
+      setError("Unable to connect to auth service. Please try again.");
     } finally {
       setLoading(false);
     }
