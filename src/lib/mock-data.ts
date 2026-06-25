@@ -180,6 +180,77 @@ export const sidebarNav: SidebarGroup[] = [
     items: [
       { label: "Content & Media", icon: "✧", href: "/dashboard/content" },
       { label: "Client Portal", icon: "⬡", href: "/dashboard/portal" },
+      { label: "Worksheets", icon: "◇", href: "/dashboard/worksheets" },
     ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { label: "AI Brain", icon: "⚡", href: "/dashboard/ai-brain" },
+      { label: "Messaging", icon: "✉", href: "/dashboard/messaging" },
+      { label: "Team", icon: "★", href: "/dashboard/team" },
+      { label: "Notifications", icon: "🔔", href: "/dashboard/notifications" },
+      { label: "Settings", icon: "⚙", href: "/dashboard/settings" },
+    ],
+  },
+];
+
+export const worksheetLibrary = [
+  { title: "Brand Identity Foundations", phase: "CC", phaseName: "Clarity Core", fields: 4, description: "Define your core brand identity elements" },
+  { title: "Brand Gap Analysis", phase: "CC", phaseName: "Clarity Core", fields: 3, description: "Identify gaps between current and desired brand positioning" },
+  { title: "Authority Blueprint", phase: "AP", phaseName: "Authority Positioning", fields: 3, description: "Map your thought leadership strategy" },
+  { title: "Signature Messaging Framework", phase: "AP", phaseName: "Authority Positioning", fields: 2, description: "Develop your signature talking points" },
+  { title: "PR Strategy Planner", phase: "VE", phaseName: "Visibility Engine", fields: 3, description: "Plan your media outreach strategy" },
+  { title: "Social Proof Audit", phase: "PM", phaseName: "Proof & Momentum", fields: 3, description: "Catalog and optimize your proof assets" },
+  { title: "SFC Business Foundations", phase: "SFC", phaseName: "Six Figure Chicks", fields: 3, description: "Business model assessment for SFC members" },
+];
+
+export const teamMembers = [
+  { name: "Chrissy Bernal", role: "Owner", email: "chrissy@beabetterbrand.com", status: "Active", initials: "CB" },
+  { name: "Maya Lewis", role: "Team Member", email: "maya@beabetterbrand.com", status: "Active", initials: "ML" },
+  { name: "Jordan Chen", role: "Team Member", email: "jordan@beabetterbrand.com", status: "Active", initials: "JC" },
+  { name: "Priya Desai", role: "Team Member", email: "priya@beabetterbrand.com", status: "Invited", initials: "PD" },
+];
+
+export const notifications = [
+  { title: "Sarah M. completed Clarity Core worksheet", message: "Brand Identity Foundations has been submitted for review.", time: "10 min ago", type: "worksheet", read: false },
+  { title: "Invoice paid — Danielle R.", message: "Visibility Retainer $5,000 for June.", time: "2 hours ago", type: "payment", read: false },
+  { title: "Forbes feature confirmed", message: "Danielle R.'s feature is scheduled for June 28.", time: "Yesterday", type: "media", read: true },
+  { title: "New lead: Monica T.", message: "Fractional CMO inquiry, $8,500/mo tier.", time: "3 days ago", type: "lead", read: true },
+  { title: "Milestone complete", message: "Brianna K. completed Proof & Momentum phase.", time: "4 days ago", type: "journey", read: true },
+];
+
+export const journeyData = [
+  {
+    phase: 1, name: "Clarity Core", status: "complete",
+    milestones: [
+      { title: "Brand Architecture Gap Session", status: "complete", type: "session_completed" },
+      { title: "Brand Identity Foundations Worksheet", status: "complete", type: "worksheet_submitted" },
+      { title: "Brand Gap Analysis Worksheet", status: "complete", type: "worksheet_submitted" },
+    ]
+  },
+  {
+    phase: 2, name: "Authority Positioning", status: "complete",
+    milestones: [
+      { title: "Authority Blueprint Complete", status: "complete", type: "worksheet_submitted" },
+      { title: "Signature Messaging Framework", status: "complete", type: "worksheet_submitted" },
+      { title: "Key Messages Approved", status: "complete", type: "deliverable_approved" },
+    ]
+  },
+  {
+    phase: 3, name: "Visibility Engine", status: "in_progress",
+    milestones: [
+      { title: "PR Strategy Planner Complete", status: "complete", type: "worksheet_submitted" },
+      { title: "First Media Pitch Sent", status: "complete", type: "custom" },
+      { title: "First Media Placement", status: "in_progress", type: "press_placement" },
+    ]
+  },
+  {
+    phase: 4, name: "Proof & Momentum", status: "not_started",
+    milestones: [
+      { title: "Social Proof Audit Complete", status: "not_started", type: "worksheet_submitted" },
+      { title: "Case Study Published", status: "not_started", type: "brand_asset_published" },
+      { title: "Momentum Review Session", status: "not_started", type: "session_completed" },
+    ]
   },
 ];

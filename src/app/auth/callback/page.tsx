@@ -14,7 +14,7 @@ function CallbackHandler() {
       const type = searchParams.get('type')
 
       if (type === 'recovery') {
-        router.push('/dashboard/settings')
+        router.push('/dashboard/settings?tab=password')
       } else if (session) {
         router.push('/dashboard')
       } else {
@@ -34,11 +34,7 @@ function CallbackHandler() {
 export default function CallbackPage() {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e0a4a' }}>
-      <Suspense fallback={
-        <p style={{ color: '#f0c370', fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 16 }}>
-          Loading...
-        </p>
-      }>
+      <Suspense fallback={<p style={{ color: '#f0c370' }}>Loading...</p>}>
         <CallbackHandler />
       </Suspense>
     </div>
