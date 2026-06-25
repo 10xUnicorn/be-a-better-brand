@@ -11,7 +11,7 @@ export default function DashboardLayout({
       <Sidebar />
       <div
         style={{
-          marginLeft: 240,
+          marginLeft: 260,
           flex: 1,
           display: "flex",
           flexDirection: "column",
@@ -19,7 +19,7 @@ export default function DashboardLayout({
         }}
       >
         <Topbar />
-        <div style={{ padding: "28px 32px", flex: 1 }}>{children}</div>
+        <div style={{ padding: "28px 36px", flex: 1 }}>{children}</div>
       </div>
     </div>
   );

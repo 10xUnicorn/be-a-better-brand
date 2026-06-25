@@ -25,7 +25,7 @@ export default function LoginPage() {
       } else {
         window.location.href = "/dashboard";
       }
-    } catch (err) {
+    } catch {
       setError("Unable to connect to auth service. Please try again.");
     } finally {
       setLoading(false);
@@ -46,33 +46,40 @@ export default function LoginPage() {
       <div
         style={{
           background: "rgba(255,255,255,0.95)",
-          borderRadius: 16,
-          padding: "40px 36px",
-          maxWidth: 420,
+          borderRadius: 20,
+          padding: "48px 40px",
+          maxWidth: 440,
           width: "100%",
-          boxShadow: "0 8px 40px rgba(30,10,74,0.3)",
+          boxShadow: "0 12px 60px rgba(30,10,74,0.35)",
           border: "1px solid rgba(240,195,112,0.3)",
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://trpnlkntvulkjerevngm.supabase.co/storage/v1/object/public/dashboard-assets/logos/1782365592080-Be_A_Better_Brand_Logo.png"
             alt="Be a Better Brand"
-            style={{ maxHeight: 56, marginBottom: 16 }}
+            style={{
+              maxHeight: 64,
+              marginBottom: 20,
+              display: "block",
+              marginLeft: "auto",
+              marginRight: "auto",
+              filter: "drop-shadow(0 4px 12px rgba(30,10,74,0.25))",
+            }}
           />
           <h1
             className="serif"
             style={{
-              fontSize: 22,
+              fontSize: 26,
               fontWeight: 700,
               color: "#1e0a4a",
-              marginBottom: 4,
+              marginBottom: 6,
             }}
           >
             Command Center
           </h1>
-          <p style={{ fontSize: 13, color: "#7a6090", fontStyle: "italic" }}>
+          <p style={{ fontSize: 14, color: "#7a6090", fontStyle: "italic" }}>
             Sign in to your dashboard
           </p>
         </div>
@@ -82,10 +89,10 @@ export default function LoginPage() {
             style={{
               background: "#fce0e0",
               color: "#8a2020",
-              padding: "10px 14px",
-              borderRadius: 8,
-              fontSize: 13,
-              marginBottom: 16,
+              padding: "12px 16px",
+              borderRadius: 10,
+              fontSize: 14,
+              marginBottom: 20,
             }}
           >
             {error}
@@ -93,7 +100,7 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 18 }}>
             <label>Email Address</label>
             <input
               type="email"
@@ -103,13 +110,13 @@ export default function LoginPage() {
               required
             />
           </div>
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: 24 }}>
             <label>Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={"●".repeat(8)}
               required
             />
           </div>
@@ -117,7 +124,7 @@ export default function LoginPage() {
             type="submit"
             className="btn btn-gold"
             disabled={loading}
-            style={{ width: "100%", textAlign: "center", fontSize: 14, padding: "12px 20px" }}
+            style={{ width: "100%", textAlign: "center", fontSize: 15, padding: "14px 20px" }}
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
@@ -126,8 +133,8 @@ export default function LoginPage() {
         <div
           style={{
             textAlign: "center",
-            marginTop: 16,
-            fontSize: 12,
+            marginTop: 20,
+            fontSize: 13,
             color: "#7a6090",
           }}
         >
@@ -139,15 +146,15 @@ export default function LoginPage() {
         <div
           style={{
             textAlign: "center",
-            marginTop: 24,
-            paddingTop: 16,
+            marginTop: 28,
+            paddingTop: 18,
             borderTop: "1px solid rgba(240,195,112,0.2)",
-            fontSize: 10,
+            fontSize: 12,
             color: "#9a8aaa",
             fontStyle: "italic",
           }}
         >
-          Finally Seen Framework™ · Be a Better Brand
+          Finally Seen Framework&trade; &middot; Be a Better Brand
         </div>
       </div>
     </div>

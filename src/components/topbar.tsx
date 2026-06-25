@@ -10,6 +10,12 @@ const pageTitles: Record<string, string> = {
   "/dashboard/finance": "Finance & Stripe",
   "/dashboard/content": "Content & Media",
   "/dashboard/portal": "Client Portal",
+  "/dashboard/worksheets": "Worksheets",
+  "/dashboard/ai-brain": "AI Brain",
+  "/dashboard/messaging": "Messaging",
+  "/dashboard/team": "Team Management",
+  "/dashboard/notifications": "Notifications",
+  "/dashboard/journey": "My Journey",
   "/dashboard/settings": "Settings",
 };
 
@@ -29,7 +35,7 @@ export default function Topbar() {
       <div className="page-title serif">{title}</div>
       <div className="topbar-right">
         <span className="greeting">{getGreeting()}, Chrissy</span>
-        <span className="topbar-badge">✦ 3 Tasks Due</span>
+        <span className="topbar-badge">{"\u2726"} 3 Tasks Due</span>
         <div className="avatar">CB</div>
       </div>
       <style jsx>{`
@@ -37,8 +43,8 @@ export default function Topbar() {
           background: rgba(255, 255, 255, 0.72);
           backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(240, 195, 112, 0.25);
-          padding: 0 32px;
-          height: 62px;
+          padding: 0 36px;
+          height: 68px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -47,7 +53,7 @@ export default function Topbar() {
           z-index: 50;
         }
         .page-title {
-          font-size: 20px;
+          font-size: 24px;
           font-weight: 700;
           color: #1e0a4a;
           letter-spacing: 0.3px;
@@ -55,10 +61,10 @@ export default function Topbar() {
         .topbar-right {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 16px;
         }
         .greeting {
-          font-size: 12.5px;
+          font-size: 14px;
           color: #5a4070;
           font-style: italic;
           font-family: "Cormorant Garamond", "Georgia", serif;
@@ -67,25 +73,26 @@ export default function Topbar() {
           background: #e8b84b;
           color: #1e0a4a;
           border-radius: 20px;
-          padding: 3px 10px;
-          font-size: 11px;
+          padding: 5px 14px;
+          font-size: 12px;
           font-weight: 700;
-          font-family: "Cormorant Garamond", "Georgia", serif;
+          font-family: "DM Sans", sans-serif;
         }
         .avatar {
-          width: 36px;
-          height: 36px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           background: linear-gradient(135deg, #c9a84c, #e8b84b);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: "Cormorant Garamond", "Georgia", serif;
-          font-size: 13px;
+          font-family: "DM Sans", sans-serif;
+          font-size: 14px;
           font-weight: 700;
           color: #1e0a4a;
           letter-spacing: 0.5px;
           border: 2px solid rgba(240, 195, 112, 0.5);
+          cursor: pointer;
         }
       `}</style>
     </div>
