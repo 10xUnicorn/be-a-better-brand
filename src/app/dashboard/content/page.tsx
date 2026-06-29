@@ -1,17 +1,87 @@
-import { contentCalendar } from "@/lib/mock-data";
+"use client";
+
+import { useState } from "react";
+import { contentCalendar, visibilityPlacements } from "@/lib/mock-data";
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+const typeColor: Record<string, string> = {
+  Podcast: "pill-purple", Social: "pill-amber", Email: "pill-gold",
+  "Media": "pill-green", "PR Pitch": "pill-purple", Blog: "pill-amber",
+};
+
+const statusColor: Record<string, string> = {
+  Scheduled: "pill-green", Drafting: "pill-purple", "In Review": "pill-gold",
+  Idea: "pill-amber", Recording: "pill-amber", Pitched: "pill-purple",
+};
+
+function CalendarView({ items }: { items: typeof contentCalendar }) {
+  const today = new Date();
+  const [month, setMonth] = useState(today.getMonth());
+  const [year, setYear] = useState(today.getFullYear());
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = Array.from({ length: firstDay + daysInMonth }, (_, i) =>
+    i < firstDay ? null : i - firstDay + 1
+  );
+
+  const itemsByDay: Record<number, typeof contentCalendar> = {};
+  items.forEach((item) => {
+    const d = parseInt(item.day);
+    const m = MONTHS.indexOf(item.month);
+    if (m === month) {
+      if (!itemsByDay[d]) itemsByDay[d] = [];
+      itemsByDay[d].push(item);
+    }
+  });
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <button className="btn btn-outline btn-sm" onClick={() => { if (month === 0) { setMonth(11); setYear(y => y - 1); } else setMonth(m => m - 1); }}>← Prev</button>
+        <span className="serif" style={{ fontSize: 18, fontWeight: 700, color: "#1e0a4a" }}>{MONTHS[month]} {year}</span>
+        <button className="btn btn-outline btn-sm" onClick={() => { if (month === 11) { setMonth(0); setYear(y => y + 1); } else setMonth(m => m + 1); }}>Next →</button>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 8 }}>
+        {DAYS.map(d => (
+          <div key={d} style={{ textAlign: "center", fontSize: 11, fontWeight: 700, color: "#7a6090", padding: "4px 0", textTransform: "uppercase", letterSpacing: "1px" }}>{d}</div>
+        ))}
+        {cells.map((day, i) => (
+          <div key={i} style={{
+            minHeight: 80, background: day ? "rgba(255,255,255,0.7)" : "transparent",
+            border: day ? "1px solid rgba(240,195,112,0.2)" : "none",
+            borderRadius: 8, padding: day ? "6px 8px" : 0,
+            outline: day === today.getDate() && month === today.getMonth() ? "2px solid #c9a84c" : "none",
+          }}>
+            {day && (
+              <>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#1e0a4a", marginBottom: 4 }}>{day}</div>
+                {(itemsByDay[day] || []).map((item, j) => (
+                  <div key={j} style={{ fontSize: 10, background: "rgba(30,10,74,0.08)", borderRadius: 4, padding: "2px 5px", marginBottom: 2, color: "#2a1a40", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {item.title}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ContentPage() {
+  const [view, setView] = useState<"list" | "calendar">("list");
+  const [selectedItem, setSelectedItem] = useState<typeof contentCalendar[0] | null>(null);
+  const [selectedPlacement, setSelectedPlacement] = useState<typeof visibilityPlacements[0] | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+
   return (
     <>
       {/* KPI Cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 14,
-          marginBottom: 26,
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {[
           { label: "Content Published (30d)", value: "14", trend: "▲ 3 more than May", color: "#5a8a5a" },
           { label: "PR Pitches Active", value: "8", trend: "◆ 4 outlets pending", color: "#8a7a50" },
@@ -19,103 +89,46 @@ export default function ContentPage() {
           { label: "Newsletter Open Rate", value: "61%", trend: "▲ Industry avg: 22%", color: "#5a8a5a" },
         ].map((kpi) => (
           <div className="kpi-card" key={kpi.label}>
-            <div className="serif" style={{ fontSize: "9.5px", textTransform: "uppercase", letterSpacing: "1.8px", color: "#7a6090", marginBottom: 8, fontWeight: 600 }}>
-              {kpi.label}
-            </div>
-            <div className="serif" style={{ fontSize: 26, fontWeight: 700, color: "#1e0a4a", lineHeight: 1 }}>
-              {kpi.value}
-            </div>
-            <div style={{ fontSize: "10.5px", marginTop: 5, color: kpi.color }}>{kpi.trend}</div>
+            <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "1.8px", color: "#7a6090", marginBottom: 10, fontWeight: 600 }}>{kpi.label}</div>
+            <div className="serif" style={{ fontSize: 30, fontWeight: 700, color: "#1e0a4a", lineHeight: 1 }}>{kpi.value}</div>
+            <div style={{ fontSize: 13, marginTop: 6, color: kpi.color }}>{kpi.trend}</div>
           </div>
         ))}
       </div>
 
-      {/* Two-column: Calendar + AI Composer */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-        {/* Content Calendar */}
-        <div className="panel">
-          <div className="panel-head">
-            <span className="panel-title">Content Calendar — June 2025</span>
-            <span className="pill pill-gold">This Month</span>
-          </div>
-          <div className="panel-body">
-            {contentCalendar.map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  gap: 12,
-                  padding: "10px 0",
-                  borderBottom: i < contentCalendar.length - 1 ? "1px solid rgba(240,195,112,0.12)" : "none",
-                  alignItems: "center",
-                }}
-              >
-                <div
-                  style={{
-                    minWidth: 42,
-                    textAlign: "center",
-                    background: "linear-gradient(135deg, #1e0a4a, #331081)",
-                    borderRadius: 8,
-                    padding: "6px 4px",
-                    color: "#f0c370",
-                  }}
-                >
-                  <div className="serif" style={{ fontSize: 16, fontWeight: 700, lineHeight: 1 }}>{item.day}</div>
-                  <div className="serif" style={{ fontSize: "8.5px", textTransform: "uppercase", letterSpacing: "1px", opacity: 0.75 }}>{item.month}</div>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#1e0a4a", marginBottom: 2 }}>{item.title}</div>
-                  <div style={{ fontSize: "10.5px", color: "#7a6090", fontStyle: "italic" }}>{item.type}</div>
-                </div>
-                <span className={`pill ${item.statusClass}`}>{item.status}</span>
-              </div>
-            ))}
+      {/* Content Calendar */}
+      <div className="panel">
+        <div className="panel-head">
+          <span className="panel-title">Content Calendar</span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className={`btn btn-sm ${view === "list" ? "btn-gold" : "btn-outline"}`} onClick={() => setView("list")}>List</button>
+            <button className={`btn btn-sm ${view === "calendar" ? "btn-gold" : "btn-outline"}`} onClick={() => setView("calendar")}>📅 Calendar</button>
+            <button className="btn btn-purple btn-sm" onClick={() => setShowCreate(true)}>+ New Content</button>
           </div>
         </div>
-
-        {/* AI Content Composer */}
-        <div className="panel">
-          <div className="panel-head">
-            <span className="panel-title">AI Content Composer</span>
-            <span className="pill pill-purple">AI Brain™</span>
-          </div>
-          <div className="panel-body">
-            <div style={{ marginBottom: 16 }}>
-              <label>Content Type</label>
-              <select defaultValue="">
-                <option value="" disabled>Select content type...</option>
-                <option>LinkedIn Post</option>
-                <option>Newsletter Intro</option>
-                <option>Press Pitch Email</option>
-                <option>Podcast Show Notes</option>
-                <option>Instagram Caption</option>
-              </select>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label>Topic / Brief</label>
-              <textarea rows={3} placeholder="Describe the topic, angle, or key message..." />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label>Client Context (Optional)</label>
-              <select defaultValue="">
-                <option value="">No specific client</option>
-                <option>Danielle R. — Visibility Retainer</option>
-                <option>Sarah M. — Book Launch Sprint</option>
-                <option>Christine L. — Fractional CMO</option>
-              </select>
-            </div>
-            <button className="btn btn-gold" style={{ width: "100%" }}>
-              ✦ Generate Draft
-            </button>
-            <div className="ai-card" style={{ marginTop: 16 }}>
-              <div className="serif" style={{ fontSize: 12, fontWeight: 700, color: "#1e0a4a", marginBottom: 4 }}>
-                ✧ AI-generated content will appear here
-              </div>
-              <div style={{ fontSize: "11.5px", color: "#5a4070", fontStyle: "italic", lineHeight: 1.6 }}>
-                Select a content type and provide a brief to generate a draft. AI output is a suggestion — review and edit before publishing.
-              </div>
-            </div>
-          </div>
+        <div className="panel-body">
+          {view === "calendar" ? (
+            <CalendarView items={contentCalendar} />
+          ) : (
+            <table>
+              <thead>
+                <tr><th>Date</th><th>Title</th><th>Type</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {contentCalendar.map((item) => (
+                  <tr key={item.title} className="clickable" onClick={() => setSelectedItem(item)} style={{ cursor: "pointer" }}>
+                    <td style={{ fontWeight: 600, color: "#c9a84c", whiteSpace: "nowrap" }}>{item.month} {item.day}</td>
+                    <td><strong>{item.title}</strong></td>
+                    <td><span className={`pill ${typeColor[item.type] || "pill-amber"}`}>{item.type}</span></td>
+                    <td><span className={`pill ${statusColor[item.status] || "pill-amber"}`}>{item.status}</span></td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <button className="btn btn-outline btn-sm" onClick={() => setSelectedItem(item)}>Edit</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
@@ -123,41 +136,108 @@ export default function ContentPage() {
       <div className="panel">
         <div className="panel-head">
           <span className="panel-title">PR & Media Tracker</span>
-          <span className="pill pill-purple">8 Active Pitches</span>
+          <span className="pill pill-purple">{visibilityPlacements.length} Active</span>
         </div>
-        <div className="panel-body">
+        <div className="panel-body" style={{ padding: 0 }}>
           <table>
             <thead>
-              <tr>
-                <th>Outlet</th>
-                <th>Client</th>
-                <th>Pitch Date</th>
-                <th>Status</th>
-                <th>Journalist</th>
-                <th>Notes</th>
-              </tr>
+              <tr><th>Publication</th><th>Client</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              {[
-                { outlet: "Forbes.com", client: "Danielle R.", date: "May 10", status: "Placed", statusClass: "pill-green", journalist: "Jennifer W.", notes: "Feature live May 28" },
-                { outlet: "Inc. Magazine", client: "Monica T.", date: "May 22", status: "Editing", statusClass: "pill-amber", journalist: "Marcus D.", notes: "Revisions due June 5" },
-                { outlet: "Fast Company", client: "Sarah M.", date: "Jun 3", status: "Pitched", statusClass: "pill-purple", journalist: "Alicia R.", notes: "Follow-up scheduled" },
-                { outlet: "Entrepreneur", client: "Lisa W.", date: "Jun 8", status: "In Review", statusClass: "pill-gold", journalist: "David K.", notes: "Editor reviewing" },
-                { outlet: "Harvard Business Review", client: "Christine L.", date: "Jun 12", status: "Pitched", statusClass: "pill-purple", journalist: "Sarah T.", notes: "Initial contact" },
-              ].map((p) => (
-                <tr key={p.outlet}>
-                  <td><strong>{p.outlet}</strong></td>
+              {visibilityPlacements.map((p) => (
+                <tr key={p.publication} className="clickable" onClick={() => setSelectedPlacement(p)} style={{ cursor: "pointer" }}>
+                  <td><strong>{p.publication}</strong></td>
                   <td>{p.client}</td>
-                  <td>{p.date}</td>
-                  <td><span className={`pill ${p.statusClass}`}>{p.status}</span></td>
-                  <td>{p.journalist}</td>
-                  <td style={{ fontSize: 11, color: "#7a6090", fontStyle: "italic" }}>{p.notes}</td>
+                  <td><span className={`pill ${p.pillClass}`}>{p.status}</span></td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <button className="btn btn-outline btn-sm" onClick={() => setSelectedPlacement(p)}>Edit</button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Edit Content Modal */}
+      {selectedItem && (
+        <div className="modal-overlay" onClick={() => setSelectedItem(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="serif" style={{ fontSize: 22, fontWeight: 700, color: "#1e0a4a", marginBottom: 24 }}>Edit Content</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              <div style={{ gridColumn: "1 / -1" }}><label>Title</label><input defaultValue={selectedItem.title} /></div>
+              <div><label>Type</label>
+                <select defaultValue={selectedItem.type}>
+                  <option>Podcast</option><option>Newsletter</option><option>Social</option><option>PR Pitch</option><option>Media</option><option>Blog</option>
+                </select>
+              </div>
+              <div><label>Status</label>
+                <select defaultValue={selectedItem.status}>
+                  <option>Idea</option><option>Drafting</option><option>In Review</option><option>Scheduled</option><option>Published</option>
+                </select>
+              </div>
+              <div><label>Publish Date</label><input type="date" defaultValue={`2025-06-${selectedItem.day.padStart(2,"0")}`} /></div>
+              <div><label>Channel / Platform</label><input defaultValue={selectedItem.type} /></div>
+            </div>
+            <div><label>Body / Notes</label><textarea rows={4} placeholder="Content body or notes..." /></div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
+              <button className="btn btn-outline" onClick={() => setSelectedItem(null)}>Cancel</button>
+              <button className="btn btn-gold" onClick={() => setSelectedItem(null)}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Placement Modal */}
+      {selectedPlacement && (
+        <div className="modal-overlay" onClick={() => setSelectedPlacement(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="serif" style={{ fontSize: 22, fontWeight: 700, color: "#1e0a4a", marginBottom: 24 }}>Edit PR Placement</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div><label>Publication</label><input defaultValue={selectedPlacement.publication} /></div>
+              <div><label>Client</label><input defaultValue={selectedPlacement.client} /></div>
+              <div><label>Journalist</label><input placeholder="Journalist name" /></div>
+              <div><label>Pitch Date</label><input type="date" /></div>
+              <div><label>Status</label>
+                <select defaultValue={selectedPlacement.status}>
+                  <option>Pitched</option><option>Followed Up</option><option>In Review</option><option>Editing</option><option>Placed</option><option>Declined</option>
+                </select>
+              </div>
+              <div><label>Placement URL</label><input type="url" placeholder="https://..." /></div>
+            </div>
+            <div style={{ marginTop: 16 }}><label>Notes</label><textarea rows={2} placeholder="Internal notes..." /></div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
+              <button className="btn btn-outline" onClick={() => setSelectedPlacement(null)}>Cancel</button>
+              <button className="btn btn-gold" onClick={() => setSelectedPlacement(null)}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Content Modal */}
+      {showCreate && (
+        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="serif" style={{ fontSize: 22, fontWeight: 700, color: "#1e0a4a", marginBottom: 24 }}>New Content Item</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div style={{ gridColumn: "1 / -1" }}><label>Title</label><input placeholder="Content title..." /></div>
+              <div><label>Type</label>
+                <select><option>Podcast</option><option>Newsletter</option><option>LinkedIn</option><option>Instagram</option><option>PR Pitch</option><option>Blog</option></select>
+              </div>
+              <div><label>Status</label>
+                <select><option>Idea</option><option>Drafting</option><option>In Review</option><option>Scheduled</option></select>
+              </div>
+              <div><label>Publish Date</label><input type="date" /></div>
+              <div><label>Channel</label><input placeholder="LinkedIn, Podcast, Email..." /></div>
+            </div>
+            <div style={{ marginTop: 16 }}><label>Notes</label><textarea rows={3} placeholder="Content brief or notes..." /></div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
+              <button className="btn btn-outline" onClick={() => setShowCreate(false)}>Cancel</button>
+              <button className="btn btn-gold" onClick={() => setShowCreate(false)}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
