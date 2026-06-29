@@ -35,7 +35,8 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isAuthPage = path.startsWith('/auth/')
   const isApiRoute = path.startsWith('/api')
-  const isPublicPage = path === '/'
+  // All marketing/public pages — only /dashboard/** requires auth
+  const isPublicPage = !path.startsWith('/dashboard')
 
   if (!user && !isAuthPage && !isApiRoute && !isPublicPage) {
     const url = request.nextUrl.clone()
