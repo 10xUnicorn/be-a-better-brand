@@ -258,7 +258,7 @@ export default function HomePage() {
 
           <h1 className="hero-h1" id="hero-h1">
             <span className="hero-h1-line">The people who need you</span>
-            <span className="hero-h1-line">should be able to <em>find you.</em></span>
+            <span className="hero-h1-line">should be able to <em id="hero-typed-word">find you.</em></span>
           </h1>
 
           <div className="hero-rule" aria-hidden="true" />
@@ -555,40 +555,136 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* PARTICLE + SCROLL REVEAL SCRIPTS */}
+      {/* ENHANCED ANIMATIONS */}
       <script dangerouslySetInnerHTML={{ __html: `
-        // Particles
+        // ── ADVANCED PARTICLE CANVAS with connection lines ──
         (function(){
           var c=document.getElementById('particles-canvas');
           if(!c)return;
           var ctx=c.getContext('2d');
           var pts=[];
-          function resize(){ c.width=c.offsetWidth; c.height=c.offsetHeight; }
+          function resize(){ c.width=window.innerWidth; c.height=window.innerHeight; }
           resize(); window.addEventListener('resize',resize);
-          for(var i=0;i<60;i++){
+          for(var i=0;i<80;i++){
             pts.push({
-              x:Math.random()*c.width, y:Math.random()*c.height,
-              vx:(Math.random()-.5)*.25, vy:(Math.random()-.5)*.25,
-              r:Math.random()*1.5+.5, o:Math.random()*.5+.1
+              x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+              vx:(Math.random()-.5)*.3, vy:(Math.random()-.5)*.3,
+              r:Math.random()*1.8+.3, o:Math.random()*.6+.1,
+              pulse:Math.random()*Math.PI*2
             });
           }
-          function draw(){
+          function draw(t){
             ctx.clearRect(0,0,c.width,c.height);
-            pts.forEach(function(p){
+            // Draw connection lines between nearby particles
+            for(var i=0;i<pts.length;i++){
+              for(var j=i+1;j<pts.length;j++){
+                var dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+                var dist=Math.sqrt(dx*dx+dy*dy);
+                if(dist<120){
+                  ctx.beginPath();
+                  ctx.moveTo(pts[i].x,pts[i].y);
+                  ctx.lineTo(pts[j].x,pts[j].y);
+                  ctx.strokeStyle='rgba(201,168,76,'+(0.15*(1-dist/120))+')';
+                  ctx.lineWidth=0.5;
+                  ctx.stroke();
+                }
+              }
+            }
+            // Draw particles
+            pts.forEach(function(p,i){
               p.x+=p.vx; p.y+=p.vy;
+              p.pulse+=0.02;
               if(p.x<0)p.x=c.width; if(p.x>c.width)p.x=0;
               if(p.y<0)p.y=c.height; if(p.y>c.height)p.y=0;
+              var r=p.r*(1+0.3*Math.sin(p.pulse));
+              var o=p.o*(0.7+0.3*Math.sin(p.pulse+1));
               ctx.beginPath();
-              ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-              ctx.fillStyle='rgba(201,168,76,'+p.o+')';
+              ctx.arc(p.x,p.y,r,0,Math.PI*2);
+              ctx.fillStyle='rgba(201,168,76,'+o+')';
               ctx.fill();
             });
             requestAnimationFrame(draw);
           }
-          draw();
+          draw(0);
         })();
 
-        // Scroll reveal
+        // ── TYPED WORD CYCLING in hero headline ──
+        (function(){
+          var words=['find you.','choose you.','trust you.','pay you.'];
+          var el=document.getElementById('hero-typed-word');
+          if(!el)return;
+          var idx=0, charIdx=0, deleting=false, pause=0;
+          function type(){
+            if(pause>0){pause--;setTimeout(type,50);return;}
+            var word=words[idx];
+            if(!deleting){
+              charIdx++;
+              el.textContent=word.slice(0,charIdx);
+              if(charIdx===word.length){deleting=true;pause=40;}
+              setTimeout(type,deleting?30:80);
+            } else {
+              charIdx--;
+              el.textContent=word.slice(0,charIdx);
+              if(charIdx===0){deleting=false;idx=(idx+1)%words.length;pause=8;}
+              setTimeout(type,deleting?30:80);
+            }
+          }
+          setTimeout(type,1600);
+        })();
+
+        // ── MOVING GRADIENT ORBS ──
+        (function(){
+          var hero=document.querySelector('.hero');
+          if(!hero)return;
+          var orb1=document.createElement('div');
+          var orb2=document.createElement('div');
+          var orb3=document.createElement('div');
+          function styleOrb(o,color,size,x,y){
+            o.style.cssText='position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;transition:none;';
+            o.style.background=color; o.style.width=size; o.style.height=size;
+            o.style.left=x; o.style.top=y; o.style.opacity='0.12';
+            hero.appendChild(o);
+          }
+          styleOrb(orb1,'radial-gradient(circle,#c9a84c,transparent)','600px','10%','20%');
+          styleOrb(orb2,'radial-gradient(circle,#331081,transparent)','500px','60%','50%');
+          styleOrb(orb3,'radial-gradient(circle,#c9a84c,transparent)','400px','40%','-10%');
+          var t=0;
+          function animOrbs(){
+            t+=0.003;
+            orb1.style.transform='translate('+Math.sin(t)*60+'px,'+Math.cos(t*0.7)*40+'px)';
+            orb2.style.transform='translate('+Math.cos(t*0.8)*50+'px,'+Math.sin(t*1.1)*60+'px)';
+            orb3.style.transform='translate('+Math.sin(t*1.3)*40+'px,'+Math.cos(t)*30+'px)';
+            requestAnimationFrame(animOrbs);
+          }
+          animOrbs();
+        })();
+
+        // ── PARALLAX on scroll ──
+        (function(){
+          var hero=document.querySelector('.hero-content');
+          var rings=document.querySelectorAll('.hero-ring');
+          if(!hero)return;
+          window.addEventListener('scroll',function(){
+            var y=window.scrollY;
+            hero.style.transform='translateY('+y*.3+'px)';
+            hero.style.opacity=Math.max(0,1-y/600);
+            rings.forEach(function(r,i){ r.style.transform='translateY('+y*(0.1*(i+1))+'px) scale('+(1+i*0.04)+')'; });
+          },{passive:true});
+        })();
+
+        // ── SCAN LINE on hero ──
+        (function(){
+          var hero=document.querySelector('.hero');
+          if(!hero)return;
+          var scan=document.createElement('div');
+          scan.style.cssText='position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4),transparent);pointer-events:none;z-index:3;animation:scanMove 4s linear infinite;';
+          var style=document.createElement('style');
+          style.textContent='@keyframes scanMove{0%{top:-2px;opacity:0}10%{opacity:1}90%{opacity:0.5}100%{top:100%;opacity:0}}';
+          document.head.appendChild(style);
+          hero.appendChild(scan);
+        })();
+
+        // ── SCROLL REVEAL ──
         (function(){
           var els=document.querySelectorAll('.reveal');
           var io=new IntersectionObserver(function(entries){

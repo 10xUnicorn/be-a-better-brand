@@ -1,67 +1,72 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import FAQAccordion from './FAQAccordion'
 
 export const metadata: Metadata = {
   title: 'PR Services | Be a Better Brand',
   description:
-    'Six-month PR campaigns that build lasting authority — brand audit, message architecture, media kit, active outreach, and Ad Equivalent Value reporting. Book a discovery call with Chrissy Bernal.',
+    'Six-month strategic PR campaigns for entrepreneurs and authors. Brand audit, StoryBrand messaging, media kit, custom pitches, and active outreach that delivers real results. Book a discovery call.',
 }
 
-const TIMELINE = [
+const DELIVERABLES = [
+  'Establish a Solid Brand',
+  'Social Media Audit',
+  'Online Presence Audit',
+  'SWOT Analysis',
+  'One-Sheet',
+  'Media Kit',
+  'Custom PR Plan',
+  'Custom Pitches',
+  'Reports',
+  'Growth Consulting',
+  'Best-Seller Road Map',
+  'Media Coaching',
+]
+
+const CASE_STUDIES = [
   {
-    months: 'Months 1–2',
-    phase: 'Brand Audit + Message Architecture',
-    icon: '01',
-    items: [
-      'Deep-dive brand audit: voice, positioning, competitive landscape',
-      'StoryBrand-aligned messaging framework built from scratch',
-      'Ideal audience profile and editorial persona mapping',
-      'Core narrative and bio assets crafted for media-ready delivery',
-      'Brand authority gap analysis with prioritized action plan',
-    ],
+    label: 'Service-Based Business',
+    tag: 'Lead Generation',
+    story:
+      'This client was a fairly new brand that needed solid leads for their service-based business. After nailing down their messaging and goals, we began targeting very niche-specific outlets. Within the first few interviews she took part in, she received extremely qualified leads, another expert sourcing opportunity, and additional leads for a smaller branch of her company. Within a short amount of time, she was able to secure business opportunities that could more than pay for her Marketing and PR retainer.',
   },
   {
-    months: 'Months 3–4',
-    phase: 'Media Kit + Pitch Development',
-    icon: '02',
-    items: [
-      'Premium media kit design and copywriting',
-      'Signature story arc developed for each target vertical',
-      'Custom pitch angles crafted for 30+ target publications',
-      'Podcast and speaking opportunity research and shortlist',
-      'AEO content brief to position you in AI-generated search answers',
-    ],
+    label: 'Author & Speaker',
+    tag: 'Book & Speaking',
+    story:
+      "This client's goal was to sell more books and get more speaking gigs (both paid and unpaid). After nailing down her message and speaking points, we began targeting smaller outlets so she could test out the points. We moved to larger outlets and local venues. We achieved many PR opportunities within the first few months, which resulted in a minimum of one paid speaking gig and aided in her achieving International Best-Seller status.",
   },
   {
-    months: 'Months 5–6',
-    phase: 'Active Outreach + Placement Reporting',
-    icon: '03',
-    items: [
-      'Active media outreach across editorial, podcast, and digital targets',
-      'Real-time pitch tracking and editor follow-up cadence',
-      'Secured placements delivered with Ad Equivalent Value reporting',
-      'Social amplification strategy for every published placement',
-      'Final authority asset package and next-phase PR roadmap',
-    ],
+    label: 'Best-Seller Campaign',
+    tag: 'Top-Tier Placements',
+    story:
+      'Her goal was to achieve best-seller status and get as many quality mentions of her brand and book as possible. Her book debuted as a best-seller, she appeared in many high-quality outlets, including TV, and she quickly received a full-length feature in a top-tier outlet. Her book continues to remain a best-seller in multiple categories.',
   },
 ]
 
-const RESULTS = [
+const FAQS = [
   {
-    stat: 'International Bestseller',
-    desc: 'A client author went from unknown manuscript to Amazon international bestseller within 90 days of PR campaign launch — with placements in three countries driving pre-order momentum.',
-    tag: 'Book Launch',
+    q: 'How does the six-month campaign begin?',
+    a: "Your six-month PR campaign will begin with an onboarding call where we'll establish your messaging using the StoryBrand messaging framework. Then, our team will craft your messaging. Our founder, Chrissy, will establish your custom PR plan; we'll begin identifying the target outlets and crafting the pitches. We'll also make sure your brand has what it needs for a solid foundation, and we'll audit your current online presence.",
   },
   {
-    stat: 'TV Appearances',
-    desc: 'A Houston-based entrepreneur secured three local TV segment appearances in a single quarter, translating media authority into a 40% increase in inbound leads.',
-    tag: 'Media Booking',
+    q: 'What types of clients do you typically work with?',
+    a: 'We specialize in working with authors, entrepreneurs, and podcasters who want to build lasting authority. We have experience with service-based businesses, authors building their platforms, speakers pursuing paid opportunities, and executives seeking thought leadership placements.',
   },
   {
-    stat: 'ROI in 90 Days',
-    desc: 'A consulting client attributed $85k in new business directly to a single Thrive Global feature — proof that the right placement, in the right publication, in front of the right audience, pays for itself.',
-    tag: 'ROI Tracking',
+    q: 'How long before I start seeing results?',
+    a: 'PR takes time to build momentum. The first one to two months focus on establishing your brand foundation, messaging, and PR plan. Outreach begins in earnest by month two or three, and placements typically begin appearing from month three onward. Some clients secure coverage faster, especially with a strong existing brand foundation.',
+  },
+  {
+    q: 'What makes Be a Better Brand different from other PR firms?',
+    a: 'We begin every engagement with brand architecture — not pitching. That means we invest the early months in making sure your messaging is crystal clear before we put it in front of journalists and editors. This architecture-first approach produces placements that actually convert to business results, not just logo-farm mentions.',
+  },
+  {
+    q: 'Do you guarantee placements?',
+    a: 'No ethical PR firm can guarantee specific placements — editorial decisions are ultimately made by editors and producers. What we can guarantee is that our team will craft compelling, targeted pitches and pursue placements with persistence and professionalism. Our track record speaks for itself.',
+  },
+  {
+    q: 'What is the Best-Seller Road Map?',
+    a: 'For authors in our campaigns, we develop a strategic road map designed to help your book achieve Amazon bestseller status. This includes coordinated PR timing, category strategy, and the right mix of media placements to drive review and purchase momentum during launch windows.',
   },
 ]
 
@@ -73,41 +78,52 @@ export default function PRServicesPage() {
         <div className="page-hero-inner">
           <p className="page-hero-eyebrow reveal">PR Campaigns &amp; Retainers</p>
           <h1 className="reveal reveal-d1">
-            Strategic PR That Builds<br />
-            <em>Lasting Authority</em>
+            Increase Your Audience and<br />
+            <em>Improve Your Authority</em><br />
+            with Strategic PR
           </h1>
           <p className="page-hero-sub reveal reveal-d2">
-            Six months of focused, architecture-first media strategy — from brand audit to active outreach to Ad Equivalent Value you can show your board.
+            Six months of focused, architecture-first media strategy — from brand audit and StoryBrand messaging to active outreach and placements that move the needle on your business.
           </p>
+          <div className="reveal reveal-d3" style={{ marginTop: 36 }}>
+            <a href="https://go.oncehub.com/GettingToKnow" target="_blank" rel="noopener" className="btn-gold">
+              Book a Discovery Call
+            </a>
+          </div>
         </div>
         <div className="page-hero-wave" />
       </section>
 
-      {/* SECTION 1: WHAT MAKES BBB DIFFERENT */}
+      {/* SECTION 1: HOW IT WORKS */}
       <section style={{ background: 'var(--cream)', padding: '96px 48px' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'start' }}>
             <div>
-              <p className="sec-label reveal">Our Difference</p>
+              <p className="sec-label reveal">The Process</p>
               <h2 className="sec-h2 reveal reveal-d1" style={{ marginBottom: 28 }}>
-                PR Built on<br /><em>Brand Architecture</em>
+                Architecture First.<br /><em>Then Pitching.</em>
               </h2>
               <p className="sec-p reveal reveal-d2" style={{ marginBottom: 20 }}>
-                Most PR agencies pitch first and hope the placements stick. We reverse the order. Before we write a single pitch, we audit your brand voice, rebuild your message architecture using StoryBrand methodology, and identify the narrative angles most likely to resonate with editorial teams.
+                Your six-month PR campaign will begin with an onboarding call where we&apos;ll establish your messaging using the StoryBrand messaging framework. Then, our team will craft your messaging.
               </p>
               <p className="sec-p reveal reveal-d2" style={{ marginBottom: 20 }}>
-                The result? Placements in publications that actually move the needle — not just logo-farm mentions that inflate a vanity press page. We progress clients intentionally from mid-tier placements that build credibility to top-tier features that shift perception.
+                Our founder, Chrissy, will establish your custom PR plan; we&apos;ll begin identifying the target outlets and crafting the pitches. We&apos;ll also make sure your brand has what it needs for a solid foundation, and we&apos;ll audit your current online presence.
               </p>
-              <p className="sec-p reveal reveal-d3">
-                And unlike anyone else in the space, we layer in AEO — Answer Engine Optimization — so your brand appears when AI assistants answer questions about your industry. The press page of the future is an AI overview. We build yours now.
+              <p className="sec-p reveal reveal-d3" style={{ marginBottom: 32 }}>
+                Every element is built for lasting authority — not vanity metrics. You&apos;ll receive monthly reports that translate media coverage into Ad Equivalent Value so you always know the ROI of your campaign.
               </p>
+              <div className="reveal reveal-d4">
+                <a href="https://go.oncehub.com/GettingToKnow" target="_blank" rel="noopener" className="btn-gold">
+                  Start Your Campaign
+                </a>
+              </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               {[
-                { label: 'Architecture First', desc: 'StoryBrand-aligned messaging before a single pitch is written.' },
-                { label: 'Mid-to-Top Tier Progression', desc: 'Credibility built systematically, not randomly.' },
-                { label: 'AEO Integration', desc: 'Your authority surfaces in AI-generated answers, not just search results.' },
-                { label: 'AEV Reporting', desc: 'Every placement reported as Ad Equivalent Value — a metric that makes sense to your business.' },
+                { label: 'Month 1–2: Foundation', desc: 'Brand audit, StoryBrand messaging, online presence audit, SWOT analysis, and one-sheet creation.' },
+                { label: 'Month 2–3: Media Materials', desc: 'Media kit design and copy, custom PR plan, targeted pitch development, and Best-Seller Road Map.' },
+                { label: 'Month 3–6: Active Outreach', desc: 'Pitching to target outlets, podcast bookings, speaker opportunities, and media coaching for interviews.' },
+                { label: 'Ongoing: Growth Consulting', desc: 'Monthly reports with Ad Equivalent Value, strategy check-ins, and continuous campaign refinement.' },
               ].map((item, i) => (
                 <div
                   key={item.label}
@@ -119,8 +135,11 @@ export default function PRServicesPage() {
                     padding: '24px 28px',
                     borderLeft: '3px solid #c9a84c',
                     boxShadow: '0 2px 16px rgba(30,10,74,0.05)',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,#c9a84c,#e8c97a)' }} />
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#a07830', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' }}>{item.label}</div>
                   <div style={{ fontSize: 15, color: '#5a4070', lineHeight: 1.7 }}>{item.desc}</div>
                 </div>
@@ -130,73 +149,60 @@ export default function PRServicesPage() {
         </div>
       </section>
 
-      {/* SECTION 2: 6-MONTH TIMELINE */}
+      {/* SECTION 2: DELIVERABLES */}
       <section style={{ background: 'linear-gradient(160deg, #1e0a4a, #2d1260)', padding: '96px 48px' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 72 }}>
-            <p className="reveal" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', marginBottom: 16 }}>The Campaign Roadmap</p>
+            <p className="reveal" style={{ fontSize: 10, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', marginBottom: 16 }}>Everything Included</p>
             <h2 className="reveal reveal-d1" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 'clamp(32px, 4vw, 60px)', fontWeight: 300, color: '#fff', lineHeight: 1.12, letterSpacing: '-0.3px' }}>
-              Your Six-Month PR<br /><em style={{ color: '#c9a84c', fontStyle: 'italic' }}>Campaign Timeline</em>
+              Your Campaign<br /><em style={{ color: '#c9a84c', fontStyle: 'italic' }}>Deliverables</em>
             </h2>
+            <p className="reveal reveal-d2" style={{ fontSize: 16, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, marginTop: 16, maxWidth: 540, margin: '16px auto 0' }}>
+              Twelve core deliverables designed to build a brand that attracts attention and converts it into business results.
+            </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-            {TIMELINE.map((phase, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+            {DELIVERABLES.map((item, i) => (
               <div
-                key={phase.phase}
-                className={`reveal reveal-d${i + 1}`}
+                key={item}
+                className={`reveal reveal-d${(i % 4) + 1}`}
                 style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(201,168,76,0.18)',
-                  borderRadius: 20,
-                  padding: '48px 56px',
-                  display: 'grid',
-                  gridTemplateColumns: '200px 1fr',
-                  gap: 48,
-                  alignItems: 'start',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(201,168,76,0.2)',
+                  borderRadius: 12,
+                  padding: '28px 24px',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <div>
-                  <div style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, serif",
-                    fontSize: 80,
-                    fontWeight: 300,
-                    color: 'rgba(201,168,76,0.15)',
-                    lineHeight: 1,
-                    marginBottom: 8,
-                  }}>{phase.icon}</div>
-                  <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: '#c9a84c', marginBottom: 8 }}>{phase.months}</div>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontWeight: 600, color: '#fff', lineHeight: 1.3 }}>{phase.phase}</h3>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,#c9a84c,#e8c97a)' }} />
+                <div style={{ fontSize: 28, color: 'rgba(201,168,76,0.2)', fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, marginBottom: 8, lineHeight: 1 }}>
+                  {String(i + 1).padStart(2, '0')}
                 </div>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {phase.items.map((item) => (
-                    <li key={item} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                      <span style={{ color: '#c9a84c', marginTop: 2, flexShrink: 0 }}>◆</span>
-                      <span style={{ fontSize: 15, color: 'rgba(255,255,255,0.7)', lineHeight: 1.7 }}>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', lineHeight: 1.4 }}>{item}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 3: RESULT STORIES */}
+      {/* SECTION 3: CASE STUDIES */}
       <section style={{ background: '#fff', padding: '96px 48px' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div style={{ marginBottom: 64 }}>
-            <p className="sec-label reveal">Client Results</p>
+            <p className="sec-label reveal">Real Client Results</p>
             <h2 className="sec-h2 reveal reveal-d1" style={{ marginBottom: 16 }}>
-              What Authority Looks<br /><em>Like in Practice</em>
+              What Our Campaigns<br /><em>Accomplish in the Real World</em>
             </h2>
             <p className="sec-p reveal reveal-d2">
-              Real campaigns. Real placements. Real business impact.
+              Three stories from real campaigns. Names withheld by client request.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 28 }}>
-            {RESULTS.map((r, i) => (
+            {CASE_STUDIES.map((cs, i) => (
               <div
-                key={r.stat}
+                key={cs.label}
                 className={`reveal reveal-d${i + 1}`}
                 style={{
                   background: 'var(--cream)',
@@ -207,8 +213,11 @@ export default function PRServicesPage() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 16,
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,#c9a84c,#e8c97a)' }} />
                 <span style={{
                   fontSize: 10,
                   fontWeight: 700,
@@ -219,85 +228,46 @@ export default function PRServicesPage() {
                   padding: '4px 12px',
                   borderRadius: 4,
                   width: 'fit-content',
-                }}>{r.tag}</span>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: '#1e0a4a', lineHeight: 1.1 }}>{r.stat}</h3>
-                <p style={{ fontSize: 15, color: '#5a4070', lineHeight: 1.8 }}>{r.desc}</p>
+                }}>{cs.tag}</span>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontWeight: 300, color: '#1e0a4a', lineHeight: 1.2 }}>{cs.label}</h3>
+                <p style={{ fontSize: 15, color: '#5a4070', lineHeight: 1.8 }}>{cs.story}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 4: PRICING */}
+      {/* SECTION 4: FAQ */}
       <section style={{ background: 'var(--cream)', padding: '96px 48px' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
-          <p className="sec-label reveal">Investment</p>
-          <h2 className="sec-h2 reveal reveal-d1" style={{ textAlign: 'center', marginBottom: 48 }}>
-            The 6-Month PR<br /><em>Campaign Retainer</em>
-          </h2>
-          <div
-            className="reveal reveal-d2"
-            style={{
-              background: '#fff',
-              border: '1px solid rgba(201,168,76,0.25)',
-              borderRadius: 24,
-              padding: '56px 64px',
-              boxShadow: '0 16px 64px rgba(30,10,74,0.10)',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, background: 'linear-gradient(90deg, #c9a84c, #e8c97a, #c9a84c)' }} />
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 72, fontWeight: 300, color: '#1e0a4a', lineHeight: 1, marginBottom: 4 }}>
-              $5,000
-            </div>
-            <div style={{ fontSize: 16, color: '#a07830', fontWeight: 600, marginBottom: 32, letterSpacing: 0.5 }}>per month · 6-month minimum engagement</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, textAlign: 'left', marginBottom: 40 }}>
-              {[
-                'Full brand audit + message architecture',
-                'StoryBrand messaging framework',
-                'Premium media kit (design + copy)',
-                '30+ custom pitch angles',
-                'Active media outreach & follow-up',
-                'Podcast + speaking opportunity pitching',
-                'AEO content brief for AI authority',
-                'Monthly Ad Equivalent Value reporting',
-                'Basecamp project management access',
-                'Dedicated PR team (Chrissy + Madi)',
-              ].map((item) => (
-                <div key={item} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  <span style={{ color: '#c9a84c', flexShrink: 0, marginTop: 1 }}>◆</span>
-                  <span style={{ fontSize: 14, color: '#5a4070', lineHeight: 1.6 }}>{item}</span>
-                </div>
-              ))}
-            </div>
-            <a
-              href="https://go.oncehub.com/GettingToKnow"
-              target="_blank"
-              rel="noopener"
-              className="btn-gold"
-              style={{ fontSize: 15, padding: '16px 40px' }}
-            >
-              Book Your Discovery Call
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 5: FAQ */}
-      <section style={{ background: '#fff', padding: '96px 48px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <p className="sec-label reveal">Common Questions</p>
-          <h2 className="sec-h2 reveal reveal-d1" style={{ marginBottom: 48 }}>
+          <h2 className="sec-h2 reveal reveal-d1" style={{ marginBottom: 56 }}>
             Frequently Asked<br /><em>Questions</em>
           </h2>
-          <div className="reveal reveal-d2">
-            <FAQAccordion />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {FAQS.map((faq, i) => (
+              <div
+                key={i}
+                className={`reveal reveal-d${(i % 4) + 1}`}
+                style={{
+                  background: '#fff',
+                  border: '1px solid rgba(201,168,76,0.2)',
+                  borderRadius: 12,
+                  padding: '28px 32px',
+                  boxShadow: '0 2px 16px rgba(30,10,74,0.05)',
+                }}
+              >
+                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 20, fontWeight: 600, color: '#1e0a4a', marginBottom: 12 }}>
+                  {faq.q}
+                </h3>
+                <p style={{ fontSize: 15, color: '#5a4070', lineHeight: 1.8 }}>{faq.a}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
+      {/* DARK CTA */}
       <section style={{ background: 'linear-gradient(160deg, #1e0a4a, #2d1260)', padding: '96px 48px' }}>
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
           <p className="page-hero-eyebrow reveal">Ready to Start?</p>
