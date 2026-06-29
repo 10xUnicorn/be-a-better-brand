@@ -1,238 +1,188 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 
-type DocType = 'proposal' | 'brand_brief' | 'roadmap' | 'game_plan'
-
-const DB_COLUMN: Record<DocType, string> = {
+const DB_COLUMN: Record<string, string> = {
   proposal: 'proposal_html',
   brand_brief: 'brand_brief_html',
   roadmap: 'roadmap_html',
   game_plan: 'game_plan_html',
+  analysis: 'ai_prompt',
+  all_prompts: 'ai_prompt',
 }
 
-function buildPrompt(
-  docType: DocType,
-  intakeData: Record<string, string>,
-  dealData: Record<string, unknown>,
-  offerTemplate: Record<string, unknown> | null
-): string {
-  const clientName = (intakeData.client_name || dealData.contact_name || 'the client') as string
-  const businessType = (intakeData.business_type || intakeData.industry || 'business owner') as string
-  const goal = (intakeData.primary_goal || intakeData.goal || '') as string
-  const challenge = (intakeData.main_challenge || intakeData.challenge || '') as string
-  const audience = (intakeData.target_audience || intakeData.audience || '') as string
-  const currentRevenue = (intakeData.current_revenue || '') as string
-  const revenueGoal = (intakeData.revenue_goal || '') as string
-  const timeline = (intakeData.timeline || '6 months') as string
-  const offerName = ((offerTemplate as Record<string, unknown>)?.name || dealData.offer_name || 'Be a Better Brand Retainer') as string
-  const pricing = ((offerTemplate as Record<string, unknown>)?.price || dealData.deal_value || '') as string
-  const deliverables = ((offerTemplate as Record<string, unknown>)?.deliverables || '') as string
-
-  const brandVoiceNote = `
-Brand voice: Observational, precise, outcome-focused. No generic marketing language.
-No phrases like "unlock your potential," "take your brand to the next level," or "skyrocket your results."
-Write as an expert practitioner who has seen exactly this pattern before and knows the fix.
-Use specific, concrete language. Name the real problem. Name the real outcome.`
-
-  const intakeFields = Object.entries(intakeData)
-    .filter(([, v]) => v)
-    .map(([k, v]) => `- ${k.replace(/_/g, ' ')}: ${v}`)
-    .join('\n')
-
-  if (docType === 'proposal') {
-    return `You are Chrissy Bernal, founder of Be a Better Brand. Write a formal HTML proposal document for ${clientName}.
-
-${brandVoiceNote}
-
-Client context:
-${intakeFields}
-
-Offer: ${offerName}
-Investment: ${pricing}
-Deliverables included: ${deliverables}
-Timeline: ${timeline}
-Primary goal: ${goal}
-Main challenge: ${challenge}
-Target audience: ${audience}
-
-Write a complete, polished proposal in HTML (no markdown, no code fences — pure HTML body content only, starting with <div>).
-Structure:
-1. <h1> heading with client name and proposal title
-2. Opening section: "Why Now" — name the specific gap you observed in ${clientName}'s current brand position. Be precise.
-3. "The Work" — describe exactly what will happen, phase by phase, using the Finally Seen Framework (Clarity Core → Authority Positioning → Visibility Engine → Proof & Momentum) as relevant
-4. "Deliverables" — bulleted list of specific deliverables for ${offerName}
-5. "Investment" — clearly state ${pricing}, payment structure, and what's included
-6. "Timeline" — ${timeline} breakdown
-7. "What Happens Next" — clear next steps with a call to action
-8. Signature block for Chrissy Bernal, Be a Better Brand
-
-Do not use generic filler. Every sentence should earn its place.`
+function fillTemplate(template: string, vars: Record<string, string>): string {
+  let result = template
+  for (const [key, value] of Object.entries(vars)) {
+    result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value || '[Not provided]')
   }
-
-  if (docType === 'brand_brief') {
-    return `You are Chrissy Bernal, founder of Be a Better Brand. Write a comprehensive Brand Brief HTML document for ${clientName}.
-
-${brandVoiceNote}
-
-Client context:
-${intakeFields}
-
-Business type: ${businessType}
-Primary goal: ${goal}
-Target audience: ${audience}
-Current revenue: ${currentRevenue}
-Revenue goal: ${revenueGoal}
-
-Write a complete Brand Brief in HTML (pure HTML body content only, starting with <div>).
-Structure:
-1. <h1> Brand Brief — ${clientName}
-2. Brand Foundation
-   - Who they are (precise, not generic)
-   - What they do and for whom (specific audience language)
-   - Why it matters now (market timing / cultural moment)
-3. Brand Positioning Statement (single tight paragraph)
-4. Mission & Vision (concrete, not aspirational fluff)
-5. Target Audience Profile — 2-3 specific personas with real pain points, not demographics
-6. Messaging Pillars (3-4 core themes with 2-3 supporting messages each)
-7. Voice & Tone Guidelines — specific dos and don'ts with examples
-8. Authority Positioning — where ${clientName} fits in the landscape, what makes them unmistakable
-9. Content Themes — 5 core content territories with rationale
-10. Brand Words to Own — 6-8 specific terms/phrases to use consistently
-
-Be specific to ${clientName}'s actual situation based on the intake data. No placeholder copy.`
-  }
-
-  if (docType === 'roadmap') {
-    return `You are Chrissy Bernal, founder of Be a Better Brand. Write a 12-Month Visibility Roadmap HTML document for ${clientName}.
-
-${brandVoiceNote}
-
-Client context:
-${intakeFields}
-
-Primary goal: ${goal}
-Starting point: ${challenge}
-Revenue goal: ${revenueGoal}
-Offer: ${offerName}
-
-Write a complete 12-Month Roadmap in HTML (pure HTML body content only, starting with <div>).
-Structure:
-1. <h1> 12-Month Brand Visibility Roadmap — ${clientName}
-2. Executive summary: Where we're starting, where we're going, and why this sequence
-3. For each of the 12 months, a section with:
-   - Month number and name (e.g., "Month 1: Foundation")
-   - The Finally Seen phase it falls under
-   - 3-5 specific milestones/deliverables for that month
-   - Key metric to track
-   - One decision point or risk to watch
-4. Milestone summary table (Month | Focus | Key Output | Metric)
-5. Success criteria — what "done" looks like at 12 months
-
-Months 1-2 = Clarity Core, Months 3-5 = Authority Positioning, Months 6-9 = Visibility Engine, Months 10-12 = Proof & Momentum.
-Be specific to ${clientName}'s business. Name real deliverables, real publications to target, real platforms to use.`
-  }
-
-  if (docType === 'game_plan') {
-    return `You are Chrissy Bernal, founder of Be a Better Brand. Write a 90-Day Game Plan HTML document for ${clientName}.
-
-${brandVoiceNote}
-
-Client context:
-${intakeFields}
-
-Primary goal: ${goal}
-Main challenge: ${challenge}
-Business type: ${businessType}
-Timeline to first result: ${timeline}
-
-Write a complete 90-Day Game Plan in HTML (pure HTML body content only, starting with <div>).
-Structure:
-1. <h1> 90-Day Game Plan — ${clientName}
-2. The Focus: What we are solving in 90 days and why that, not something else
-3. Week-by-week breakdown for 13 weeks:
-   - Week number
-   - Phase (Clarity Core / Authority Positioning / Visibility Engine)
-   - 3-4 specific tasks (not vague actions — name the exact deliverable, the exact platform, the exact meeting)
-   - Owner (Chrissy/Team or ${clientName})
-   - Success indicator
-4. 30/60/90-Day Checkpoints — what we assess and decide at each gate
-5. Non-negotiables — 3-5 commitments that make the plan work
-6. What success looks like at Day 90
-
-Every week must have concrete, named tasks. No "research your audience" — instead name specifically what research, what output, who sees it.`
-  }
-
-  return `Write a document for ${clientName} based on: ${intakeFields}`
+  return result
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { deal_id, doc_type, intake_data } = body as {
-      deal_id: string
-      doc_type: DocType
-      intake_data: Record<string, string>
-    }
+    const { deal_id, doc_type, intake_data, form } = await request.json()
 
-    if (!deal_id || !doc_type || !intake_data) {
-      return NextResponse.json({ error: 'deal_id, doc_type, and intake_data are required' }, { status: 400 })
-    }
-
-    if (!['proposal', 'brand_brief', 'roadmap', 'game_plan'].includes(doc_type)) {
-      return NextResponse.json({ error: 'Invalid doc_type' }, { status: 400 })
+    if (!deal_id || !doc_type) {
+      return NextResponse.json({ error: 'deal_id and doc_type are required' }, { status: 400 })
     }
 
     const supabase = await createServiceClient()
 
-    // Fetch deal and offer template
-    const { data: deal, error: dealError } = await supabase
+    // Fetch deal
+    const { data: deal } = await supabase
       .from('pipeline_deals')
       .select('*, offer_templates(*)')
       .eq('id', deal_id)
       .single()
 
-    if (dealError || !deal) {
-      return NextResponse.json({ error: 'Deal not found: ' + (dealError?.message || '') }, { status: 404 })
+    if (!deal) {
+      return NextResponse.json({ error: 'Deal not found' }, { status: 404 })
     }
 
-    const offerTemplate = (deal as Record<string, unknown>).offer_templates as Record<string, unknown> | null
+    // Fetch the matching prompt template from DB
+    const { data: promptTemplates } = await supabase
+      .from('prompt_templates')
+      .select('*')
+      .eq('doc_type', doc_type === 'all_prompts' ? 'analysis' : doc_type)
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(1)
 
-    // Build the AI prompt
-    const prompt = buildPrompt(doc_type, intake_data, deal as Record<string, unknown>, offerTemplate)
+    const promptTemplate = promptTemplates?.[0]
 
-    // Call the internal /api/ai endpoint
-    const origin = request.headers.get('origin') || 'http://localhost:3000'
-    const aiResponse = await fetch(`${origin}/api/ai`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, type: doc_type }),
-    })
-
-    if (!aiResponse.ok) {
-      return NextResponse.json({ error: 'AI generation failed' }, { status: 500 })
+    if (!promptTemplate) {
+      return NextResponse.json({ error: `No prompt template found for doc_type: ${doc_type}` }, { status: 404 })
     }
 
-    const aiData = await aiResponse.json() as { content: string }
-    const html = aiData.content || ''
+    // Build variable map from deal + intake data
+    const offerTemplate = deal.offer_templates as Record<string, unknown> | null
+    const intake = (intake_data || deal.intake_data || {}) as Record<string, string>
 
-    // Save HTML + prompt back to the deal
-    const dbColumn = DB_COLUMN[doc_type]
-    const { error: saveError } = await supabase
-      .from('pipeline_deals')
-      .update({
-        [dbColumn]: html,
-        ai_prompt: prompt,
+    const deliverablesArray = offerTemplate?.deliverables as string[] | null
+    const deliverablesText = deliverablesArray ? deliverablesArray.join('\n') : ''
+
+    const vars: Record<string, string> = {
+      // Deal / contact fields
+      contact_name: String(form?.contact_name || deal.contact_name || ''),
+      contact_company: String(form?.contact_company || deal.contact_company || ''),
+      contact_type: String(form?.contact_type || deal.contact_type || ''),
+      deal_value: form?.deal_value ? `$${parseFloat(form.deal_value).toLocaleString()}` : deal.deal_value ? `$${parseFloat(String(deal.deal_value)).toLocaleString()}` : '',
+      monthly_value: deal.monthly_value ? `$${parseFloat(String(deal.monthly_value)).toLocaleString()}/month` : '',
+      duration_months: String(form?.duration_months || deal.duration_months || offerTemplate?.duration_months || '6'),
+      stage: String(form?.stage || deal.stage || ''),
+      // Offer fields
+      offer_name: String(offerTemplate?.name || form?.offer_tier || deal.offer_tier || ''),
+      offer_type: String(offerTemplate?.offer_type || deal.offer_tier || ''),
+      price_type: String(offerTemplate?.price_type || 'monthly'),
+      deliverables: deliverablesText,
+      offer_description: String(offerTemplate?.description || ''),
+      // Intake fields
+      brand_name: intake.brand_name || String(form?.contact_company || deal.contact_company || ''),
+      founder_name: intake.founder_name || String(form?.contact_name || deal.contact_name || ''),
+      industry: intake.industry || '',
+      engagement_type: intake.engagement_type || String(offerTemplate?.name || ''),
+      brand_mission: intake.brand_mission || '',
+      what_is_working: intake.what_is_working || '',
+      what_is_broken: intake.what_is_broken || '',
+      prior_pr: intake.prior_pr || '',
+      primary_goal: intake.primary_goal || '',
+      milestones: intake.milestones || '',
+      dream_placement: intake.dream_placement || '',
+      ideal_audience: intake.ideal_audience || '',
+      competitors: intake.competitors || '',
+      differentiator: intake.differentiator || '',
+      transcript: intake.transcript || '',
+      additional_instructions: intake.additional_instructions || '',
+    }
+
+    // Fill the prompt template
+    const filledPrompt = fillTemplate(promptTemplate.prompt_body, vars)
+
+    // For 'analysis' type — this IS the Claude prompt, save directly
+    if (doc_type === 'analysis' || doc_type === 'all_prompts') {
+      const column = DB_COLUMN[doc_type] || 'ai_prompt'
+      await supabase.from('pipeline_deals').update({
+        [column]: filledPrompt,
         updated_at: new Date().toISOString(),
-      })
-      .eq('id', deal_id)
+      }).eq('id', deal_id)
 
-    if (saveError) {
-      console.error('Failed to save document:', saveError)
+      return NextResponse.json({ success: true, prompt: filledPrompt, html: null })
     }
 
-    return NextResponse.json({ html, prompt, success: true })
+    // For document types — call AI to generate HTML document
+    let generatedContent = filledPrompt // fallback: return the prompt itself
+    try {
+      const aiRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/ai`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: filledPrompt, type: doc_type }),
+      })
+      if (aiRes.ok) {
+        const aiData = await aiRes.json()
+        generatedContent = aiData.content || filledPrompt
+      }
+    } catch {
+      // AI unavailable — save the prompt itself as the document
+      generatedContent = `<pre style="font-family:Georgia,serif;line-height:1.8;white-space:pre-wrap;padding:32px;">${filledPrompt}</pre>`
+    }
+
+    // Wrap in BBB-branded HTML
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>${promptTemplate.name} — ${vars.contact_name}</title>
+<style>
+body { font-family: 'Georgia', serif; background: #fff; color: #1a1020; max-width: 900px; margin: 0 auto; padding: 48px; line-height: 1.8; }
+h1 { font-size: 36px; font-weight: 700; color: #1e0a4a; margin-bottom: 8px; }
+h2 { font-size: 22px; font-weight: 700; color: #1e0a4a; margin-top: 40px; margin-bottom: 12px; border-bottom: 2px solid #c9a84c; padding-bottom: 8px; }
+h3 { font-size: 17px; font-weight: 700; color: #1e0a4a; margin-top: 24px; margin-bottom: 8px; }
+p { margin-bottom: 16px; }
+.header { border-bottom: 3px solid #1e0a4a; padding-bottom: 24px; margin-bottom: 40px; }
+.brand { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #c9a84c; font-weight: 700; margin-bottom: 8px; }
+.client { font-size: 32px; font-weight: 300; color: #1e0a4a; }
+.subtitle { font-size: 14px; color: #7a6090; font-style: italic; margin-top: 4px; }
+.footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #ede9ed; font-size: 12px; color: #9a8aaa; text-align: center; letter-spacing: 1px; }
+strong { color: #1e0a4a; }
+ul { margin-bottom: 16px; padding-left: 24px; }
+li { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="header">
+<div class="brand">Be a Better Brand</div>
+<div class="client">${promptTemplate.name}</div>
+<div class="subtitle">${vars.contact_name}${vars.contact_company ? ` · ${vars.contact_company}` : ''} · Prepared by Chrissy Bernal · ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>
+</div>
+${generatedContent.startsWith('<') ? generatedContent : generatedContent.split('\n').map((line: string) => {
+  if (line.startsWith('## ')) return `<h2>${line.replace('## ', '')}</h2>`
+  if (line.startsWith('### ')) return `<h3>${line.replace('### ', '')}</h3>`
+  if (line.startsWith('# ')) return `<h1>${line.replace('# ', '')}</h1>`
+  if (line.startsWith('**') && line.endsWith('**')) return `<strong>${line.replace(/\*\*/g, '')}</strong>`
+  if (line.startsWith('- ') || line.startsWith('• ')) return `<li>${line.replace(/^[-•]\s/, '')}</li>`
+  if (line.startsWith('---')) return '<hr style="border:none;border-top:1px solid #ede9ed;margin:32px 0;">'
+  if (line.trim() === '') return '<br>'
+  return `<p>${line}</p>`
+}).join('\n')}
+<div class="footer">
+  Be a Better Brand &nbsp;·&nbsp; BeABetterBrand.com &nbsp;·&nbsp; © ${new Date().getFullYear()} Be a Better Brand. All Rights Reserved. Confidential.
+</div>
+</body>
+</html>`
+
+    // Save to deal
+    const column = DB_COLUMN[doc_type] || 'brand_brief_html'
+    const updateData: Record<string, string> = {
+      [column]: html,
+      ai_prompt: filledPrompt,
+      updated_at: new Date().toISOString(),
+    }
+
+    await supabase.from('pipeline_deals').update(updateData).eq('id', deal_id)
+
+    return NextResponse.json({ success: true, html, prompt: filledPrompt })
   } catch (err) {
     console.error('generate-document error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
   }
 }
