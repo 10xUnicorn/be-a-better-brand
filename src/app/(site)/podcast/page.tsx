@@ -4,61 +4,73 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Finally Seen Podcast | Be a Better Brand',
   description:
-    'Finally Seen™ Podcast hosted by Chrissy Bernal — for ambitious women building bold brands, meaningful lives, and unforgettable legacies. Listen on Apple Podcasts, Spotify, and YouTube.',
+    'Finally Seen — hosted by Chrissy Bernal, Visibility Strategist and Brand Architect. For ambitious women building bold brands, meaningful lives, and unforgettable legacies. Listen on Apple Podcasts and YouTube.',
 }
 
 const EPISODES = [
   {
-    number: 'EP 06',
     guest: 'Ben Albert',
-    title: 'From Feeling Invisible to Building a Global Community',
-    desc: 'Ben Albert built a network that spans continents — not by chasing algorithms, but by showing up authentically and investing in genuine human connection. Chrissy and Ben unpack the mindset shift that takes you from feeling unseen to becoming a connector at the center of something much bigger than yourself.',
-    themes: ['Visibility', 'Community Building', 'Authenticity'],
+    date: 'June 17, 2026',
+    url: 'https://beabetterbrand.com/ben-albert/',
+    image: 'https://beabetterbrand.com/wp-content/uploads/2026/06/Finally-Seen-Podcast-Cover-Art-2-1024x1024.png',
+    desc: 'A conversation about community, connection, and what it really takes to build a network that spans continents and opens doors you never imagined.',
   },
   {
-    number: 'EP 05',
     guest: 'Dawn Andrews',
-    title: 'When Working Harder Stops Working',
-    desc: 'There comes a moment in every ambitious woman\'s journey when effort alone stops moving the needle. Dawn Andrews, leadership strategist and author, shares the frameworks she uses to help high-performers transition from doing more to thinking differently — and why that shift is the actual growth edge.',
-    themes: ['Leadership', 'Scaling', 'Mindset'],
+    date: 'June 11, 2026',
+    url: 'https://beabetterbrand.com/dawn-andrews/',
+    image: 'https://beabetterbrand.com/wp-content/uploads/2026/06/Finally-Seen-Podcast-Cover-Art-1024x1024.png',
+    desc: 'Leadership strategist Dawn Andrews on what happens when working harder stops working — and the frameworks that help high-performers break through.',
   },
   {
-    number: 'EP 04',
     guest: 'Dr. Bill Clark',
-    title: 'Conscious Leadership: How Self-Awareness Becomes Your Greatest Business Asset',
-    desc: 'Dr. Bill Clark brings a rare combination of clinical psychology and business strategy to the conversation. He and Chrissy explore how the leaders who build the most enduring brands are the ones doing the deepest inner work — and how self-awareness directly translates to competitive advantage.',
-    themes: ['Leadership', 'Personal Development', 'Brand'],
+    date: 'June 3, 2026',
+    url: 'https://beabetterbrand.com/dr-bill-clark/',
+    image: null,
+    desc: 'Conscious leadership and self-awareness as competitive advantage. Dr. Bill Clark brings clinical psychology meets business strategy to the conversation.',
   },
   {
-    number: 'EP 03',
     guest: 'Mark A. Dulaney',
-    title: 'Why Smart, Capable People Stay Stuck',
-    desc: 'You have the knowledge, the experience, and the vision. So why isn\'t the business moving? Mark A. Dulaney digs into the hidden barriers — identity, fear, and misaligned systems — that keep talented entrepreneurs from breaking through to the next level, and exactly what to do about them.',
-    themes: ['Mindset', 'Strategy', 'Growth'],
+    date: 'May 19, 2026',
+    url: 'https://beabetterbrand.com/mark-a-dulaney/',
+    image: null,
+    desc: 'Why smart, capable people stay stuck — and the hidden barriers of identity, fear, and misaligned systems that block talented entrepreneurs from breaking through.',
   },
   {
-    number: 'EP 02',
     guest: 'Ann Kelley',
-    title: 'What If the Problem Isn\'t You',
-    desc: 'Ann Kelley challenges one of the most damaging narratives in the entrepreneurial world: the belief that struggle is always a personal failure. Sometimes the model is broken. Sometimes the market has shifted. Sometimes the problem isn\'t you at all — and recognizing that distinction is the first step toward real change.',
-    themes: ['Reinvention', 'Business Model', 'Resilience'],
+    date: 'April 28, 2026',
+    url: 'https://beabetterbrand.com/ann-kelley/',
+    image: null,
+    desc: "What if the problem isn't you? Ann Kelley challenges one of the most damaging narratives in entrepreneurship and shows you how to tell the difference.",
   },
   {
-    number: 'EP 01',
     guest: 'Paige Arnof-Fenn',
-    title: 'The Real Reason Your Business Isn\'t Scaling',
-    desc: 'Marketing legend Paige Arnof-Fenn has helped build brands from scratch to global recognition. In this inaugural episode, she and Chrissy unpack the most common — and most overlooked — reason that expert-led businesses plateau: the founder\'s brand hasn\'t kept pace with the business\'s ambition.',
-    themes: ['Marketing', 'Scaling', 'Brand Authority'],
+    date: 'April 7, 2026',
+    url: 'https://beabetterbrand.com/paige-arnof-fenn/',
+    image: null,
+    desc: "Marketing legend Paige Arnof-Fenn on the most overlooked reason that expert-led businesses plateau — and what it takes to finally start scaling.",
   },
-]
-
-const THEMES = [
-  { icon: '◈', label: 'Visibility & Authority', desc: 'How to build a brand that gets seen by the people who matter most.' },
-  { icon: '◉', label: 'Reinvention', desc: 'Stories of pivots, second acts, and the courage to start over with more wisdom.' },
-  { icon: '◆', label: 'Business Scaling', desc: 'Strategic conversations about what it actually takes to grow without burning out.' },
-  { icon: '◎', label: 'Mindset & Leadership', desc: 'The inner work that underpins every lasting outer achievement.' },
-  { icon: '◈', label: 'Branding & Positioning', desc: 'Tactical and philosophical conversations about owning your market position.' },
-  { icon: '◉', label: 'Legacy Building', desc: 'What it means to build something that outlasts any single campaign or quarter.' },
+  {
+    guest: 'Suzy McNamara',
+    date: 'March 18, 2026',
+    url: 'https://beabetterbrand.com/suzy-mcnamara/',
+    image: null,
+    desc: 'A candid conversation about reinvention, resilience, and what it means to build a life and business that reflects who you truly are.',
+  },
+  {
+    guest: 'Beth Jones',
+    date: 'March 3, 2026',
+    url: 'https://beabetterbrand.com/beth-jones/',
+    image: null,
+    desc: 'Beth Jones on showing up fully in business and life — the mindset shifts and practical strategies that help women lead with confidence and clarity.',
+  },
+  {
+    guest: 'Debra Eckerling',
+    date: 'February 25, 2026',
+    url: 'https://beabetterbrand.com/debra-eckerling/',
+    image: null,
+    desc: 'Goal-setting, project planning, and the art of getting things done as a creative entrepreneur. Debra Eckerling shares her proven frameworks.',
+  },
 ]
 
 export default function PodcastPage() {
@@ -69,27 +81,22 @@ export default function PodcastPage() {
         <div className="page-hero-inner">
           <p className="page-hero-eyebrow reveal">The Show</p>
           <h1 className="reveal reveal-d1">
-            Finally Seen™<br />
+            Finally Seen<br />
             <em>Podcast</em>
           </h1>
           <p className="page-hero-sub reveal reveal-d2">
             For ambitious women building bold brands, meaningful lives, and unforgettable legacies.
           </p>
-          <div className="reveal reveal-d3" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 36 }}>
-            <a
-              href="https://podcasts.apple.com/ph/podcast/finally-seen/id1823745851"
-              target="_blank"
-              rel="noopener"
-              className="btn-gold"
-            >
+          <div className="reveal reveal-d3" style={{ marginTop: 12, marginBottom: 4 }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontStyle: 'italic', color: 'rgba(201,168,76,0.85)', lineHeight: 1.4 }}>
+              It&apos;s about being seen, heard, and paid.
+            </p>
+          </div>
+          <div className="reveal reveal-d4" style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 32 }}>
+            <a href="https://podcasts.apple.com/ph/podcast/finally-seen/id1823745851" target="_blank" rel="noopener" className="btn-gold">
               Listen on Apple Podcasts
             </a>
-            <a
-              href="https://youtube.com/@ChrissyBernal"
-              target="_blank"
-              rel="noopener"
-              className="btn-ghost-light"
-            >
+            <a href="https://www.youtube.com/@ChrissyBernal" target="_blank" rel="noopener" className="btn-ghost-light">
               Watch on YouTube
             </a>
           </div>
@@ -113,7 +120,7 @@ export default function PodcastPage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/brand/finally-seen-podcast.png"
-                  alt="Finally Seen Podcast with Chrissy Bernal — episode art"
+                  alt="Finally Seen Podcast with Chrissy Bernal"
                   style={{ width: '100%', height: 'auto', display: 'block' }}
                 />
               </div>
@@ -123,49 +130,25 @@ export default function PodcastPage() {
             <div>
               <p className="sec-label reveal">About the Show</p>
               <h2 className="sec-h2 reveal reveal-d1" style={{ marginBottom: 28 }}>
-                Conversations That<br /><em>Break the Invisible Ceiling</em>
+                Hosted by<br /><em>Chrissy Bernal</em>
               </h2>
               <p className="sec-p reveal reveal-d2" style={{ marginBottom: 20 }}>
-                Finally Seen is not a business podcast that pretends building a brand is easy. It&apos;s an honest, strategic, soul-level conversation about what it takes for ambitious women to show up fully — in their businesses, in their lives, and in the markets they were built to lead.
+                Hosted by Chrissy Bernal, Visibility Strategist and Brand Architect, this podcast blends bold conversations with real-life reinvention to help you show up fully and be recognized for who you truly are, not just what you do.
               </p>
               <p className="sec-p reveal reveal-d2" style={{ marginBottom: 20 }}>
-                Every episode, host Chrissy Bernal — founder of Be a Better Brand, PR strategist, and Guinness World Record mom — sits down with guests who have cracked a code she wants to share with her audience: the code of being truly, lastingly seen.
+                Here, we believe women are never just one thing. We honor the complexity of your story, and we celebrate your desire to grow. From business and branding to motherhood, mindset, and personal power, this is a space for women (ok, men, too heehee) who are done hiding and ready to lead.
               </p>
-              <p className="sec-p reveal reveal-d3" style={{ marginBottom: 32 }}>
-                Topics range from brand positioning and PR strategy to leadership psychology, reinvention, and the mindset required to build a business that reflects who you actually are.
+              <p className="sec-p reveal reveal-d3" style={{ marginBottom: 32, fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontStyle: 'italic', color: 'var(--gold-text)' }}>
+                It&apos;s about being seen, heard, and paid.
               </p>
               <div className="reveal reveal-d4" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <a href="https://podcasts.apple.com/ph/podcast/finally-seen/id1823745851" target="_blank" rel="noopener" className="btn-gold">
                   Apple Podcasts
                 </a>
-                <a href="https://youtube.com/@ChrissyBernal" target="_blank" rel="noopener" className="btn-outline-dark">
+                <a href="https://www.youtube.com/@ChrissyBernal" target="_blank" rel="noopener" className="btn-outline-dark">
                   YouTube
                 </a>
               </div>
-            </div>
-          </div>
-
-          {/* Theme chips */}
-          <div style={{ marginTop: 72, paddingTop: 72, borderTop: '1px solid rgba(201,168,76,0.15)' }}>
-            <p className="sec-label reveal" style={{ textAlign: 'center', marginBottom: 40 }}>Themes We Explore</p>
-            <div className="reveal reveal-d1" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
-              {THEMES.map((theme) => (
-                <div
-                  key={theme.label}
-                  style={{
-                    background: '#fff',
-                    border: '1px solid rgba(201,168,76,0.2)',
-                    borderRadius: 12,
-                    padding: '24px 24px',
-                    borderLeft: '3px solid #c9a84c',
-                    boxShadow: '0 2px 12px rgba(30,10,74,0.05)',
-                  }}
-                >
-                  <span style={{ fontSize: 20, color: '#c9a84c', display: 'block', marginBottom: 10 }}>{theme.icon}</span>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#1e0a4a', marginBottom: 6 }}>{theme.label}</div>
-                  <div style={{ fontSize: 13, color: '#5a4070', lineHeight: 1.6 }}>{theme.desc}</div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -183,67 +166,91 @@ export default function PodcastPage() {
               New episodes drop regularly. Subscribe on your platform of choice so you never miss a conversation.
             </p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 28 }}>
-            {EPISODES.map((ep, i) => (
+
+          {/* Featured top two with images */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, marginBottom: 28 }}>
+            {EPISODES.slice(0, 2).map((ep, i) => (
               <a
-                key={ep.number}
-                href="https://podcasts.apple.com/ph/podcast/finally-seen/id1823745851"
+                key={ep.guest}
+                href={ep.url}
                 target="_blank"
                 rel="noopener"
-                className={`reveal reveal-d${i % 2 === 0 ? 1 : 2}`}
+                className={`reveal reveal-d${i + 1}`}
                 style={{
                   display: 'block',
                   background: 'var(--cream)',
                   border: '1px solid rgba(201,168,76,0.2)',
-                  borderRadius: 16,
-                  padding: '32px 32px',
-                  boxShadow: '0 4px 20px rgba(30,10,74,0.06)',
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 24px rgba(30,10,74,0.08)',
                   textDecoration: 'none',
-                  transition: 'transform 0.25s, box-shadow 0.25s',
+                  position: 'relative',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                  <span style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: 3,
-                    textTransform: 'uppercase',
-                    color: '#a07830',
-                    background: 'rgba(201,168,76,0.12)',
-                    padding: '4px 10px',
-                    borderRadius: 4,
-                  }}>{ep.number}</span>
-                  <span style={{ color: '#c9a84c', fontSize: 18 }}>▶</span>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,#c9a84c,#e8c97a)', zIndex: 10 }} />
+                {ep.image && (
+                  <div style={{ height: 220, overflow: 'hidden', background: '#1e0a4a' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={ep.image}
+                      alt={`Finally Seen Podcast — ${ep.guest}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </div>
+                )}
+                <div style={{ padding: '28px 32px 32px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <span style={{ fontSize: 12, color: '#a07830', fontWeight: 600 }}>{ep.date}</span>
+                    <span style={{ color: '#c9a84c', fontSize: 16 }}>▶</span>
+                  </div>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: '#a07830', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
+                    with {ep.guest}
+                  </p>
+                  <p style={{ fontSize: 15, color: '#5a4070', lineHeight: 1.7 }}>{ep.desc}</p>
+                  <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(201,168,76,0.15)' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#a07830' }}>Listen now →</span>
+                  </div>
                 </div>
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#a07830', letterSpacing: 1, marginBottom: 8, textTransform: 'uppercase' }}>
-                  with {ep.guest}
-                </p>
-                <h3 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 22,
-                  fontWeight: 600,
-                  color: '#1e0a4a',
-                  lineHeight: 1.3,
-                  marginBottom: 14,
-                }}>
-                  {ep.title}
-                </h3>
-                <p style={{ fontSize: 14, color: '#5a4070', lineHeight: 1.7, marginBottom: 20 }}>
-                  {ep.desc}
-                </p>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {ep.themes.map((theme) => (
-                    <span key={theme} style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: 1,
-                      textTransform: 'uppercase',
-                      color: '#5a4070',
-                      background: 'rgba(30,10,74,0.05)',
-                      padding: '3px 10px',
-                      borderRadius: 4,
-                    }}>{theme}</span>
-                  ))}
+              </a>
+            ))}
+          </div>
+
+          {/* Remaining episodes as list */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {EPISODES.slice(2).map((ep, i) => (
+              <a
+                key={ep.guest}
+                href={ep.url}
+                target="_blank"
+                rel="noopener"
+                className={`reveal reveal-d${(i % 3) + 1}`}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  gap: 24,
+                  alignItems: 'center',
+                  background: 'var(--cream)',
+                  border: '1px solid rgba(201,168,76,0.2)',
+                  borderRadius: 14,
+                  padding: '24px 28px',
+                  boxShadow: '0 2px 12px rgba(30,10,74,0.05)',
+                  textDecoration: 'none',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3, background: 'linear-gradient(180deg,#c9a84c,#e8c97a)' }} />
+                <div style={{ paddingLeft: 12 }}>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#a07830', letterSpacing: 2, textTransform: 'uppercase' }}>
+                      {ep.guest}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#5a4070' }}>{ep.date}</span>
+                  </div>
+                  <p style={{ fontSize: 14, color: '#5a4070', lineHeight: 1.6 }}>{ep.desc}</p>
+                </div>
+                <div style={{ flexShrink: 0 }}>
+                  <span style={{ color: '#c9a84c', fontSize: 20 }}>▶</span>
                 </div>
               </a>
             ))}
@@ -269,25 +276,16 @@ export default function PodcastPage() {
               className="btn-gold"
               style={{ padding: '18px 40px', fontSize: 15 }}
             >
-              🎙 Apple Podcasts
+              Apple Podcasts
             </a>
             <a
-              href="https://youtube.com/@ChrissyBernal"
+              href="https://www.youtube.com/@ChrissyBernal"
               target="_blank"
               rel="noopener"
               className="btn-ghost-light"
               style={{ padding: '18px 40px', fontSize: 15 }}
             >
-              ▶ YouTube
-            </a>
-            <a
-              href="https://open.spotify.com/search/Finally%20Seen%20Chrissy%20Bernal"
-              target="_blank"
-              rel="noopener"
-              className="btn-ghost-light"
-              style={{ padding: '18px 40px', fontSize: 15 }}
-            >
-              ♫ Spotify
+              YouTube
             </a>
           </div>
           <div className="reveal reveal-d4" style={{ marginTop: 40, padding: '24px 32px', background: 'rgba(255,255,255,0.04)', borderRadius: 12, border: '1px solid rgba(201,168,76,0.15)', display: 'inline-block' }}>
@@ -298,7 +296,7 @@ export default function PodcastPage() {
         </div>
       </section>
 
-      {/* SECTION 4: BE A GUEST CTA */}
+      {/* SECTION 4: BE A GUEST */}
       <section style={{ background: 'var(--cream)', padding: '96px 48px' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
@@ -334,23 +332,10 @@ export default function PodcastPage() {
                 borderRadius: 20,
                 padding: '48px 44px',
                 boxShadow: '0 8px 40px rgba(30,10,74,0.08)',
-                borderTop: '3px solid #c9a84c',
+                position: 'relative',
+                overflow: 'hidden',
               }}>
-                <div style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.05))',
-                  border: '1.5px solid rgba(201,168,76,0.4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 24,
-                  color: '#c9a84c',
-                  marginBottom: 24,
-                }}>
-                  🎙
-                </div>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg,#c9a84c,#e8c97a)' }} />
                 <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: '#1e0a4a', marginBottom: 16, lineHeight: 1.2 }}>
                   Pitch Your Guest Appearance
                 </h3>
@@ -372,7 +357,7 @@ export default function PodcastPage() {
         </div>
       </section>
 
-      {/* BOOKING CTA */}
+      {/* DARK CTA */}
       <section style={{ background: 'linear-gradient(160deg, #1e0a4a, #2d1260)', padding: '96px 48px' }}>
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
           <p className="page-hero-eyebrow reveal">Work With Chrissy</p>
