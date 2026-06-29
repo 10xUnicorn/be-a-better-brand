@@ -8,61 +8,167 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const supabase = createClient()
-    const { error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    if (authError) { setError(authError.message) } else { setSuccess(true) }
-    setLoading(false)
+
+    try {
+      const supabase = createClient()
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (authError) {
+        setError(authError.message || 'Signup failed. Please try again.')
+        return
+      }
+
+      // If email confirmation is disabled, session is returned immediately
+      if (data.session) {
+        window.location.href = '/dashboard'
+        return
+      }
+
+      // Email confirmation enabled — sign them in directly
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+      if (!signInError) {
+        window.location.href = '/dashboard'
+      } else {
+        // Email confirmation required
+        setError('Account created! Check your email to confirm, then sign in.')
+      }
+    } catch (err) {
+      setError('Unable to connect. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#1e0a4a' }}>
-      <div style={{ maxWidth: 420, width: '90%' }}>
-        <div className="text-center" style={{ marginBottom: 32 }}>
-          <img src="https://trpnlkntvulkjerevngm.supabase.co/storage/v1/object/public/dashboard-assets/logos/1782365592080-Be_A_Better_Brand_Logo.png" alt="Be a Better Brand" style={{ height: 60, margin: '0 auto 16px', display: 'block' }} />
-          <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 700, color: '#f0c370' }}>Create Your Account</h1>
-        </div>
-        {success ? (
-          <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(240,195,112,0.2)', borderRadius: 16, padding: 28, textAlign: 'center' }}>
-            <p style={{ color: '#f0c370', fontSize: 16, fontWeight: 700, marginBottom: 8, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Check your email</p>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>We sent a confirmation link to <strong style={{ color: '#f0c370' }}>{email}</strong>.</p>
-            <Link href="/auth/login" className="btn btn-outline" style={{ marginTop: 16, display: 'inline-block' }}>Back to Sign In</Link>
+    <div style={{
+      minHeight: '100vh',
+      background: '#1e0a4a',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+    }}>
+      {/* Logo above card */}
+      <img
+        src="https://trpnlkntvulkjerevngm.supabase.co/storage/v1/object/public/dashboard-assets/logos/1782365592080-Be_A_Better_Brand_Logo.png"
+        alt="Be a Better Brand"
+        style={{ height: 72, marginBottom: 24, filter: 'brightness(1.1)', display: 'block' }}
+      />
+
+      <h1 style={{
+        fontFamily: "'Cormorant Garamond', Georgia, serif",
+        fontSize: 28,
+        fontWeight: 700,
+        color: '#c9a84c',
+        marginBottom: 28,
+        textAlign: 'center',
+        letterSpacing: '0.5px',
+      }}>
+        Create Your Account
+      </h1>
+
+      <form
+        onSubmit={handleSignup}
+        style={{
+          background: 'rgba(255,255,255,0.07)',
+          border: '1px solid rgba(240,195,112,0.2)',
+          borderRadius: 18,
+          padding: '32px 28px',
+          width: '100%',
+          maxWidth: 420,
+        }}
+      >
+        {error && (
+          <div style={{
+            background: error.includes('created') ? 'rgba(218,240,224,0.15)' : 'rgba(252,224,224,0.15)',
+            color: error.includes('created') ? '#a0d8b0' : '#f0a0a0',
+            border: `1px solid ${error.includes('created') ? 'rgba(160,216,176,0.4)' : 'rgba(240,160,160,0.4)'}`,
+            padding: '12px 16px',
+            borderRadius: 10,
+            marginBottom: 20,
+            fontSize: 14,
+            lineHeight: 1.5,
+          }}>
+            {error}
           </div>
-        ) : (
-          <form onSubmit={handleSignup} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(240,195,112,0.2)', borderRadius: 16, padding: 28 }}>
-            {error && <div style={{ background: '#fce0e0', color: '#8a2020', padding: '8px 12px', borderRadius: 8, marginBottom: 16, fontSize: 12 }}>{error}</div>}
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ color: 'rgba(240,195,112,0.6)' }}>Full Name</label>
-              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(240,195,112,0.25)' }} />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ color: 'rgba(240,195,112,0.6)' }}>Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(240,195,112,0.25)' }} />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ color: 'rgba(240,195,112,0.6)' }}>Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(240,195,112,0.25)' }} />
-            </div>
-            <button type="submit" disabled={loading} className="btn btn-gold" style={{ width: '100%', padding: '12px 20px', fontSize: 14 }}>{loading ? 'Creating...' : 'Create Account'}</button>
-            <div className="text-center" style={{ marginTop: 16, fontSize: 12 }}>
-              <Link href="/auth/login" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Already have an account? Sign in</Link>
-            </div>
-          </form>
         )}
-      </div>
+
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ color: 'rgba(240,195,112,0.7)', fontSize: 11, letterSpacing: '1.8px', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', display: 'block', marginBottom: 8, fontWeight: 600 }}>Full Name</label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            placeholder="Your full name"
+            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(240,195,112,0.25)', borderRadius: 10, padding: '12px 16px', fontSize: 15, width: '100%' }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ color: 'rgba(240,195,112,0.7)', fontSize: 11, letterSpacing: '1.8px', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', display: 'block', marginBottom: 8, fontWeight: 600 }}>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="you@example.com"
+            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(240,195,112,0.25)', borderRadius: 10, padding: '12px 16px', fontSize: 15, width: '100%' }}
+          />
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ color: 'rgba(240,195,112,0.7)', fontSize: 11, letterSpacing: '1.8px', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', display: 'block', marginBottom: 8, fontWeight: 600 }}>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            placeholder="Min. 8 characters"
+            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(240,195,112,0.25)', borderRadius: 10, padding: '12px 16px', fontSize: 15, width: '100%' }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '14px 20px',
+            background: 'linear-gradient(135deg, #c9a84c, #e8c97a)',
+            color: '#1e0a4a',
+            border: 'none',
+            borderRadius: 10,
+            fontSize: 16,
+            fontWeight: 700,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontFamily: 'DM Sans, sans-serif',
+            opacity: loading ? 0.8 : 1,
+          }}
+        >
+          {loading ? 'Creating account...' : 'Create Account'}
+        </button>
+
+        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 14, color: 'rgba(255,255,255,0.45)' }}>
+          Already have an account?{' '}
+          <Link href="/auth/login" style={{ color: 'rgba(240,195,112,0.7)', textDecoration: 'none' }}>Sign in</Link>
+        </div>
+      </form>
     </div>
   )
 }
