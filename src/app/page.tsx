@@ -346,7 +346,7 @@ export default function HomePage() {
           <div className="about-img reveal rd1">
             <div className="about-img-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/press-hrspotlight.png" alt="Chrissy Bernal, CEO of Be a Better Brand" />
+              <img src="/brand/chrissy-editorial.jpg" alt="Chrissy Bernal, Founder & CEO of Be a Better Brand" />
             </div>
             <div className="about-badge" aria-hidden="true">
               Chrissy<br />Bernal<br />Founder

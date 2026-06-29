@@ -40,7 +40,7 @@ const TEAM = [
     role: 'Founder & CEO',
     bio:
       'The architect behind the authority. With a background spanning Literature, Publishing, PR, and Marketing, Chrissy channels 15+ years of brand-building experience into every client engagement. She created the Finally Seen™ Framework to turn invisible experts into undeniable authorities.',
-    image: '/brand/press-hrspotlight.png',
+    image: '/brand/chrissy-headshot.jpg',
     isFounder: true,
   },
   {
@@ -64,7 +64,7 @@ const TEAM = [
     role: 'Client Success',
     bio:
       'Brittany is your advocate inside the agency. She manages client relationships, keeps campaigns on track, and makes sure every deliverable exceeds expectations.',
-    image: null,
+    image: '/brand/team-brittany.jpeg',
     isFounder: false,
   },
   {
@@ -72,7 +72,7 @@ const TEAM = [
     role: 'Brand Visibility',
     bio:
       'Madison amplifies client visibility across digital channels, ensuring that PR placements have the social and content ecosystem to compound their reach long after publication.',
-    image: null,
+    image: '/brand/team-madison.png',
     isFounder: false,
   },
 ]
