@@ -428,6 +428,16 @@ function IntakeTab({
   );
 }
 
+// ─── Prompt Template Type ────────────────────────────────────────────────────
+
+interface PromptTemplate {
+  id: string;
+  name: string;
+  doc_type: string;
+  description?: string;
+  sort_order: number;
+}
+
 // ─── Documents Tab ────────────────────────────────────────────────────────────
 
 function DocumentsTab({
@@ -456,14 +466,8 @@ function DocumentsTab({
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Generation failed");
       const html: string = json.html ?? json.content ?? "";
-      // Persist to Supabase
-      const supabase = createClient();
-      await supabase
-        .from("pipeline_deals")
-        .update({ [docType]: html, updated_at: new Date().toISOString() })
-        .eq("id", deal.id);
       onDocGenerated(docType, html);
-      onToast("Document generated!");
+      onToast(`${DOC_TYPES.find(d => d.key === docType)?.label ?? "Document"} generated!`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Generation failed";
       onToast(msg, "error");
@@ -472,42 +476,49 @@ function DocumentsTab({
     }
   }
 
+  const hasIntake = deal.intake_data && Object.values(deal.intake_data).some(v => v && v.trim());
+
   return (
     <div>
+      {!hasIntake && (
+        <div style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: 12, padding: "16px 20px", marginBottom: 20, fontSize: 14, color: "#5a4070" }}>
+          <strong style={{ color: "#1e0a4a" }}>Tip:</strong> Fill in the Intake tab first — the more detail you provide, the more accurate and personalized the generated documents will be.
+        </div>
+      )}
       {DOC_TYPES.map(({ key, label }) => {
         const html = deal[key as keyof PipelineDeal] as string | undefined;
         return (
           <div className="panel" key={key}>
             <div className="panel-head">
-              <span className="panel-title">{label}</span>
-              <button
-                className="btn btn-gold btn-sm"
-                onClick={() => handleGenerate(key)}
-                disabled={generating === key}
-              >
-                {generating === key ? "Generating…" : "✦ Generate"}
-              </button>
+              <div>
+                <span className="panel-title">{label}</span>
+                {html && <span className="pill pill-green" style={{ marginLeft: 10, fontSize: 10 }}>Generated</span>}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {html && (
+                  <button className="btn btn-outline btn-sm" onClick={() => {
+                    const w = window.open("", "_blank");
+                    if (w) { w.document.write(html); w.document.close(); }
+                  }}>Preview</button>
+                )}
+                <button
+                  className="btn btn-gold btn-sm"
+                  onClick={() => handleGenerate(key)}
+                  disabled={generating !== null}
+                >
+                  {generating === key ? "Generating…" : html ? "Regenerate" : "✦ Generate"}
+                </button>
+              </div>
             </div>
             <div className="panel-body">
               {html ? (
-                <div
-                  style={{
-                    border: "1px solid rgba(240,195,112,0.2)",
-                    borderRadius: 10,
-                    padding: "16px 20px",
-                    background: "rgba(255,255,255,0.6)",
-                    fontSize: 13,
-                    color: "#2a1a40",
-                    lineHeight: 1.7,
-                    maxHeight: 400,
-                    overflowY: "auto",
-                  }}
-                  dangerouslySetInnerHTML={{ __html: html }}
-                />
+                <div style={{ border: "1px solid rgba(240,195,112,0.2)", borderRadius: 10, padding: "16px 20px", background: "rgba(255,255,255,0.6)", fontSize: 13, color: "#2a1a40", lineHeight: 1.7, maxHeight: 300, overflowY: "auto", position: "relative" }}>
+                  <div dangerouslySetInnerHTML={{ __html: html.slice(0, 1200) + (html.length > 1200 ? "…" : "") }} />
+                </div>
               ) : (
                 <div style={{ textAlign: "center", padding: "28px 0", color: "#8a7a9a" }}>
                   <div className="serif" style={{ fontSize: 14, marginBottom: 8 }}>No {label} generated yet.</div>
-                  <div style={{ fontSize: 12 }}>Fill in the Intake tab first, then click Generate.</div>
+                  <div style={{ fontSize: 12 }}>Complete the Intake tab, then click Generate to create this document using Claude AI.</div>
                 </div>
               )}
             </div>
@@ -521,74 +532,181 @@ function DocumentsTab({
 // ─── AI Prompt Tab ────────────────────────────────────────────────────────────
 
 function AiPromptTab({ deal, onToast }: { deal: PipelineDeal; onToast: (msg: string, type?: "success" | "error") => void }) {
-  const prompt = deal.ai_prompt ?? buildPromptFromIntake(deal.intake_data);
+  const [templates, setTemplates] = useState<PromptTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<PromptTemplate | null>(null);
+  const [generatedPrompt, setGeneratedPrompt] = useState<string>(deal.ai_prompt ?? "");
+  const [generating, setGenerating] = useState(false);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
 
-  function buildPromptFromIntake(intake: Record<string, string> | null | undefined): string {
-    if (!intake) return "No intake data available yet. Complete the Intake tab to generate a prompt.";
-    const i = intake as unknown as IntakeData;
-    return [
-      `Brand Intelligence Brief — ${i.brand_name || "Unknown Brand"}`,
-      `Founder: ${i.founder_name || "—"}`,
-      `Industry: ${i.industry || "—"}`,
-      `Engagement Type: ${i.engagement_type || "—"}`,
-      "",
-      `Brand Mission: ${i.brand_mission || "—"}`,
-      "",
-      `What's Working: ${i.what_is_working || "—"}`,
-      `What's Broken: ${i.what_is_broken || "—"}`,
-      `Prior PR: ${i.prior_pr || "—"}`,
-      "",
-      `Primary Goal: ${i.primary_goal || "—"}`,
-      `Key Milestones: ${i.milestones || "—"}`,
-      `Dream Placement: ${i.dream_placement || "—"}`,
-      "",
-      `Ideal Audience: ${i.ideal_audience || "—"}`,
-      `Competitors: ${i.competitors || "—"}`,
-      `Differentiator: ${i.differentiator || "—"}`,
-      "",
-      `Call Transcript:\n${i.transcript || "—"}`,
-    ].join("\n");
+  useEffect(() => {
+    fetch("/api/prompt-templates")
+      .then(r => r.json())
+      .then(d => {
+        setTemplates(d.templates ?? []);
+        if (d.templates?.length > 0) setSelectedTemplate(d.templates[0]);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingTemplates(false));
+  }, []);
+
+  // Use saved prompt when available, or empty state
+  useEffect(() => {
+    if (deal.ai_prompt) setGeneratedPrompt(deal.ai_prompt);
+  }, [deal.ai_prompt]);
+
+  async function handleGenerate() {
+    if (!selectedTemplate) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/generate-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deal_id: deal.id,
+          doc_type: selectedTemplate.doc_type,
+          intake_data: deal.intake_data ?? {},
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Generation failed");
+      setGeneratedPrompt(json.prompt ?? "");
+      onToast("Prompt generated — ready to copy to Claude!");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Generation failed";
+      onToast(msg, "error");
+    } finally {
+      setGenerating(false);
+    }
   }
 
   function handleCopy() {
-    navigator.clipboard.writeText(prompt).then(() => {
-      onToast("Prompt copied to clipboard!");
+    if (!generatedPrompt) { onToast("Generate a prompt first", "error"); return; }
+    navigator.clipboard.writeText(generatedPrompt).then(() => {
+      onToast("Prompt copied! Paste it into Claude at claude.ai");
     }).catch(() => {
-      onToast("Copy failed — please copy manually.", "error");
+      onToast("Copy failed — select the text below and copy manually.", "error");
     });
   }
 
+  const DOC_TYPE_LABELS: Record<string, string> = {
+    brand_brief: "Brand Architecture Brief",
+    proposal: "Engagement Proposal",
+    roadmap: "12-Month Roadmap",
+    game_plan: "90-Day Game Plan",
+    analysis: "Brand Intelligence Analysis (SWOT + AEO + PR Strategy)",
+    all: "Full Analysis Suite",
+  };
+
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <span className="panel-title">AI Prompt</span>
-        <button className="btn btn-gold btn-sm" onClick={handleCopy}>
-          Copy to Claude
-        </button>
-      </div>
-      <div className="panel-body">
-        <div style={{ fontSize: 11, color: "#7a6090", marginBottom: 12, lineHeight: 1.5 }}>
-          This prompt is auto-generated from the intake data. Copy it and paste it into Claude (or any AI) to generate documents, strategies, and pitches for this deal.
+    <div>
+      {/* Template selector */}
+      <div className="panel" style={{ marginBottom: 20 }}>
+        <div className="panel-head">
+          <span className="panel-title">⚡ Select Prompt Template</span>
+          <span className="pill pill-purple">BBB Templates</span>
         </div>
-        <pre
-          style={{
-            fontFamily: "'DM Sans', monospace",
-            fontSize: 12.5,
-            color: "#2a1a40",
-            background: "rgba(30,10,74,0.04)",
-            border: "1px solid rgba(201,168,76,0.2)",
-            borderRadius: 10,
-            padding: "16px 20px",
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-            lineHeight: 1.7,
-            maxHeight: 500,
-            overflowY: "auto",
-          }}
-        >
-          {prompt}
-        </pre>
+        <div className="panel-body">
+          <p style={{ fontSize: 13, color: "#5a4070", lineHeight: 1.7, marginBottom: 20 }}>
+            Select a template, click <strong>Generate Prompt</strong>, then <strong>Copy to Claude</strong> at claude.ai. All client details, intake data, offer information, and transcript auto-fill into the prompt.
+          </p>
+
+          {loadingTemplates ? (
+            <p style={{ fontSize: 13, color: "#9a8aaa" }}>Loading templates…</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+              {templates.map(t => (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTemplate(t)}
+                  style={{
+                    padding: "14px 18px",
+                    borderRadius: 10,
+                    border: `1.5px solid ${selectedTemplate?.id === t.id ? "#c9a84c" : "rgba(240,195,112,0.2)"}`,
+                    background: selectedTemplate?.id === t.id ? "rgba(201,168,76,0.08)" : "#fff",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: selectedTemplate?.id === t.id ? "#c9a84c" : "#ddd", flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: "#1e0a4a" }}>{t.name}</div>
+                      <div style={{ fontSize: 12, color: "#7a6090", marginTop: 2 }}>
+                        {DOC_TYPE_LABELS[t.doc_type] ?? t.doc_type}
+                        {t.description ? ` · ${t.description}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {templates.length === 0 && (
+                <p style={{ fontSize: 13, color: "#9a8aaa", fontStyle: "italic" }}>
+                  No prompt templates found. Check that the database migration ran successfully.
+                </p>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              className="btn btn-gold"
+              onClick={handleGenerate}
+              disabled={generating || !selectedTemplate}
+              style={{ flex: 1 }}
+            >
+              {generating ? "Generating prompt…" : `Generate: ${selectedTemplate?.name ?? "Select a template"}`}
+            </button>
+            {generatedPrompt && (
+              <button className="btn btn-purple" onClick={handleCopy}>
+                Copy to Claude
+              </button>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Generated prompt preview */}
+      {generatedPrompt ? (
+        <div className="panel">
+          <div className="panel-head">
+            <span className="panel-title">Generated Prompt</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button className="btn btn-outline btn-sm" onClick={() => setGeneratedPrompt("")}>Clear</button>
+              <button className="btn btn-gold btn-sm" onClick={handleCopy}>Copy to Claude →</button>
+            </div>
+          </div>
+          <div className="panel-body">
+            <div style={{ fontSize: 11, color: "#7a6090", marginBottom: 12, lineHeight: 1.6, padding: "10px 14px", background: "rgba(30,10,74,0.04)", borderRadius: 8 }}>
+              <strong>How to use:</strong> Click &ldquo;Copy to Claude&rdquo; → open <a href="https://claude.ai" target="_blank" rel="noopener" style={{ color: "#c9a84c" }}>claude.ai</a> → start a new chat → paste. Claude will generate the full document in Chrissy&apos;s voice with all client details filled in.
+            </div>
+            <pre style={{
+              fontFamily: "monospace",
+              fontSize: 12,
+              color: "#1e0a4a",
+              background: "rgba(30,10,74,0.03)",
+              border: "1px solid rgba(201,168,76,0.18)",
+              borderRadius: 10,
+              padding: "16px 20px",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              lineHeight: 1.75,
+              maxHeight: 480,
+              overflowY: "auto",
+            }}>
+              {generatedPrompt}
+            </pre>
+          </div>
+        </div>
+      ) : (
+        <div className="panel">
+          <div className="panel-body" style={{ textAlign: "center", padding: 40 }}>
+            <div className="serif" style={{ fontSize: 20, color: "#1e0a4a", marginBottom: 10 }}>Select a template above</div>
+            <p style={{ fontSize: 14, color: "#7a6090", maxWidth: 400, margin: "0 auto" }}>
+              Choose Brand Architecture Brief, Proposal, Roadmap, 90-Day Game Plan, or the full Brand Intelligence Analysis. Your intake data and deal details auto-populate into the prompt.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
