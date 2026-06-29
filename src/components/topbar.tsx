@@ -1,6 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "Command Overview",
@@ -17,6 +19,7 @@ const pageTitles: Record<string, string> = {
   "/dashboard/notifications": "Notifications",
   "/dashboard/journey": "My Journey",
   "/dashboard/settings": "Settings",
+  "/dashboard/projects": "Projects",
 };
 
 function getGreeting() {
@@ -28,15 +31,50 @@ function getGreeting() {
 
 export default function Topbar() {
   const pathname = usePathname();
-  const title = pageTitles[pathname] || "Dashboard";
+  const router = useRouter();
+  const title = pageTitles[pathname] || (pathname.startsWith("/dashboard/clients/") ? "Client Detail" : pathname.startsWith("/dashboard/pipeline/") ? "Deal Detail" : "Dashboard");
+
+  const [userName, setUserName] = useState("");
+  const [initials, setInitials] = useState("?");
+
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      const name = profile?.full_name || user.email?.split("@")[0] || "User";
+      setUserName(name.split(" ")[0]);
+      setInitials(
+        name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+      );
+    };
+    load();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+  };
 
   return (
     <div className="topbar">
       <div className="page-title serif">{title}</div>
       <div className="topbar-right">
-        <span className="greeting">{getGreeting()}, Chrissy</span>
-        <span className="topbar-badge">{"\u2726"} 3 Tasks Due</span>
-        <div className="avatar">CB</div>
+        {userName && (
+          <span className="greeting">{getGreeting()}, {userName}</span>
+        )}
+        <span className="topbar-badge">{"\u2726"} Command Center</span>
+        <div className="avatar" onClick={handleLogout} title="Sign out">
+          {initials || "?"}
+        </div>
       </div>
       <style jsx>{`
         .topbar {
@@ -94,6 +132,7 @@ export default function Topbar() {
           border: 2px solid rgba(240, 195, 112, 0.5);
           cursor: pointer;
         }
+        .avatar:hover { opacity: 0.85; }
       `}</style>
     </div>
   );

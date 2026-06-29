@@ -186,6 +186,7 @@ export const sidebarNav: SidebarGroup[] = [
   {
     title: "Operations",
     items: [
+      { label: "Projects", icon: "◆", href: "/dashboard/projects" },
       { label: "AI Brain", icon: "⚡", href: "/dashboard/ai-brain" },
       { label: "Messaging", icon: "✉", href: "/dashboard/messaging" },
       { label: "Team", icon: "★", href: "/dashboard/team" },
