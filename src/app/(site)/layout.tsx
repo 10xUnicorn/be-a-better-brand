@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import SiteReveal from '@/components/SiteReveal'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://be-a-better-brand.vercel.app'),
@@ -84,7 +85,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         .sec-h2 em { font-style:italic; color:var(--gold-text); }
         .sec-p { font-size:16px; color:var(--text-muted); line-height:1.8; max-width:620px; }
 
-        /* REVEAL ANIMATION */
+        /* REVEAL — start hidden, client component triggers .in on route change */
         .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
         .reveal.in { opacity:1; transform:translateY(0); }
         .reveal-d1 { transition-delay:0.1s; }
@@ -113,6 +114,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           .reveal { opacity:1!important; transform:none!important; transition:none!important; }
         }
       `}</style>
+
+      {/* Client component: re-runs IntersectionObserver on every route change */}
+      <SiteReveal />
 
       {/* NAV */}
       <nav className="site-nav" role="navigation">
@@ -187,17 +191,6 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           </div>
         </div>
       </footer>
-
-      {/* Scroll reveal */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        (function(){
-          var els = document.querySelectorAll('.reveal');
-          var io = new IntersectionObserver(function(entries){
-            entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-          },{threshold:0.08,rootMargin:'0px 0px -40px 0px'});
-          els.forEach(function(el){ io.observe(el); });
-        })();
-      `}} />
     </>
   )
 }
