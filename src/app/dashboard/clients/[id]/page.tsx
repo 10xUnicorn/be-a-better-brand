@@ -32,7 +32,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
   // In production, fetch from Supabase by ID. For demo, use first matching client or fallback.
   const client = clientRoster[parseInt(id) || 0] || clientRoster[0];
 
-  const tabs = ["profile", "journey", "worksheets", "files", "notes", "payments", "activity"];
+  const tabs = ["profile", "journey", "kpis", "notes", "deals", "projects", "worksheets", "files", "payments", "activity"];
 
   useEffect(() => {
     if (activeTab === "notes" && !notesFetched) {
@@ -307,7 +307,43 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </>
       )}
 
-      {(activeTab === "files" || activeTab === "payments" || activeTab === "activity") && (
+      {activeTab === "kpis" && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <p style={{ fontSize: 14, color: "#5a4070" }}>PR pitches, podcast bookings, reach metrics, and AI-powered insights.</p>
+            <Link href={`/dashboard/clients/${id}/kpis`} className="btn btn-gold">Open Full KPI Dashboard →</Link>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
+            {[
+              { label: "Pitches Submitted", value: "—", sub: "this month" },
+              { label: "Pitches Won", value: "—", sub: "this month" },
+              { label: "Podcast Bookings", value: "—", sub: "total" },
+              { label: "Pieces Live", value: "—", sub: "total" },
+            ].map(s => (
+              <div key={s.label} className="kpi-card">
+                <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "1.8px", color: "#7a6090", marginBottom: 10, fontWeight: 600 }}>{s.label}</div>
+                <div className="serif" style={{ fontSize: 28, fontWeight: 700, color: "#1e0a4a", lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: 12, marginTop: 6, color: "#8a7a9a" }}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <Link href={`/dashboard/clients/${id}/kpis`} style={{ fontSize: 13, color: "#c9a84c", textDecoration: "none" }}>
+              View pitches, podcasts, reach tracking, and AI insights →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "deals" && (
+        <DealsTab clientId={id} supabase={supabase} />
+      )}
+
+      {activeTab === "projects" && (
+        <ProjectsTab clientId={id} supabase={supabase} />
+      )}
+
+      {(activeTab === "files" || activeTab === "payments" || activeTab === "activity" || activeTab === "worksheets") && (
         <div className="panel">
           <div className="panel-body" style={{ textAlign: "center", padding: 40, color: "#8a7a9a" }}>
             <p className="serif" style={{ fontSize: 14, textTransform: "capitalize" }}>{activeTab} will appear here once connected to Supabase.</p>
@@ -315,5 +351,104 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </div>
       )}
     </>
+  );
+}
+
+// ── Deals Tab ─────────────────────────────────────────────────────────────────
+function DealsTab({ clientId, supabase }: { clientId: string; supabase: ReturnType<typeof import("@/lib/supabase/client").createClient> }) {
+  const [deals, setDeals] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from("pipeline_deals").select("*, offer_templates(name)").eq("client_id", clientId).order("created_at", { ascending: false }).then(({ data }) => {
+      setDeals(data || []);
+      setLoading(false);
+    });
+  }, [clientId]);
+
+  const stagePill: Record<string, string> = {
+    discovery: "pill-amber", proposal_sent: "pill-purple", negotiating: "pill-gold", won: "pill-green", lost: "pill-red",
+  };
+
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#8a7a9a" }}>Loading deals…</div>;
+
+  return (
+    <div className="panel">
+      <div className="panel-head">
+        <span className="panel-title">Associated Deals</span>
+        <Link href="/dashboard/pipeline" className="btn btn-outline btn-sm">View All Pipeline →</Link>
+      </div>
+      <div className="panel-body" style={{ padding: 0 }}>
+        {deals.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#8a7a9a" }}>
+            <p className="serif" style={{ fontSize: 14, marginBottom: 12 }}>No deals linked to this client yet.</p>
+            <Link href="/dashboard/pipeline" className="btn btn-gold btn-sm">Create a Deal</Link>
+          </div>
+        ) : (
+          <table>
+            <thead><tr><th>Deal</th><th>Offer</th><th>Value</th><th>Stage</th><th></th></tr></thead>
+            <tbody>
+              {deals.map((d) => (
+                <tr key={String(d.id)}>
+                  <td><strong>{String(d.contact_name || "")}</strong></td>
+                  <td style={{ fontSize: 13 }}>{String((d.offer_templates as Record<string,string>)?.name || d.offer_tier || "—")}</td>
+                  <td style={{ fontWeight: 600 }}>{d.deal_value ? `$${Number(d.deal_value).toLocaleString()}` : "—"}</td>
+                  <td><span className={`pill ${stagePill[String(d.stage)] || "pill-amber"}`}>{String(d.stage || "").replace(/_/g, " ")}</span></td>
+                  <td><Link href={`/dashboard/pipeline/${d.id}`} style={{ fontSize: 12, color: "#c9a84c", textDecoration: "none" }}>View →</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Projects Tab ──────────────────────────────────────────────────────────────
+function ProjectsTab({ clientId, supabase }: { clientId: string; supabase: ReturnType<typeof import("@/lib/supabase/client").createClient> }) {
+  const [projects, setProjects] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.from("projects").select("*").eq("client_id", clientId).order("created_at", { ascending: false }).then(({ data }) => {
+      setProjects(data || []);
+      setLoading(false);
+    });
+  }, [clientId]);
+
+  const statusPill: Record<string, string> = { active: "pill-green", planning: "pill-amber", on_hold: "pill-purple", completed: "pill-gold", cancelled: "pill-red" };
+
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#8a7a9a" }}>Loading projects…</div>;
+
+  return (
+    <div className="panel">
+      <div className="panel-head">
+        <span className="panel-title">Projects</span>
+        <Link href="/dashboard/projects" className="btn btn-outline btn-sm">View All Projects →</Link>
+      </div>
+      <div className="panel-body" style={{ padding: 0 }}>
+        {projects.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#8a7a9a" }}>
+            <p className="serif" style={{ fontSize: 14, marginBottom: 12 }}>No projects for this client yet.</p>
+            <Link href="/dashboard/projects" className="btn btn-gold btn-sm">Create a Project</Link>
+          </div>
+        ) : (
+          <table>
+            <thead><tr><th>Project</th><th>Status</th><th>Due</th><th></th></tr></thead>
+            <tbody>
+              {projects.map((p) => (
+                <tr key={String(p.id)}>
+                  <td><strong>{String(p.name || "")}</strong></td>
+                  <td><span className={`pill ${statusPill[String(p.status)] || "pill-amber"}`}>{String(p.status || "")}</span></td>
+                  <td style={{ fontSize: 13 }}>{p.due_date ? new Date(String(p.due_date)).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}</td>
+                  <td><Link href={`/dashboard/projects/${p.id}`} style={{ fontSize: 12, color: "#c9a84c", textDecoration: "none" }}>View →</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
   );
 }

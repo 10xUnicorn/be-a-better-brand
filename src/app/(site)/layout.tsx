@@ -14,6 +14,7 @@ const NAV = [
   { label: 'Press', href: '/press' },
   { label: 'Podcast', href: '/podcast' },
   { label: 'Blog', href: '/blog' },
+  { label: 'Book a Call', href: '/book' },
 ]
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {

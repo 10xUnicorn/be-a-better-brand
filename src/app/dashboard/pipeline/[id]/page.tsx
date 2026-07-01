@@ -533,7 +533,7 @@ function DocumentsTab({
 
 function AiPromptTab({ deal, onToast }: { deal: PipelineDeal; onToast: (msg: string, type?: "success" | "error") => void }) {
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<PromptTemplate | null>(null);
+  const [selectedId, setSelectedId] = useState<string>("");
   const [generatedPrompt, setGeneratedPrompt] = useState<string>(deal.ai_prompt ?? "");
   const [generating, setGenerating] = useState(false);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
@@ -543,125 +543,97 @@ function AiPromptTab({ deal, onToast }: { deal: PipelineDeal; onToast: (msg: str
       .then(r => r.json())
       .then(d => {
         setTemplates(d.templates ?? []);
-        if (d.templates?.length > 0) setSelectedTemplate(d.templates[0]);
+        if (d.templates?.length > 0) setSelectedId(d.templates[0].id);
       })
       .catch(() => {})
       .finally(() => setLoadingTemplates(false));
   }, []);
 
-  // Use saved prompt when available, or empty state
   useEffect(() => {
     if (deal.ai_prompt) setGeneratedPrompt(deal.ai_prompt);
   }, [deal.ai_prompt]);
 
-  async function handleGenerate() {
-    if (!selectedTemplate) return;
+  // Auto-generate when dropdown changes
+  async function handleTemplateChange(id: string) {
+    setSelectedId(id);
+    const t = templates.find(x => x.id === id);
+    if (!t) return;
     setGenerating(true);
+    setGeneratedPrompt("");
     try {
       const res = await fetch("/api/generate-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          deal_id: deal.id,
-          doc_type: selectedTemplate.doc_type,
-          intake_data: deal.intake_data ?? {},
-        }),
+        body: JSON.stringify({ deal_id: deal.id, doc_type: t.doc_type, intake_data: deal.intake_data ?? {} }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Generation failed");
+      if (!res.ok) throw new Error(json.error ?? "Failed");
       setGeneratedPrompt(json.prompt ?? "");
-      onToast("Prompt generated — ready to copy to Claude!");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Generation failed";
-      onToast(msg, "error");
+      onToast(err instanceof Error ? err.message : "Failed to build prompt", "error");
     } finally {
       setGenerating(false);
     }
   }
 
   function handleCopy() {
-    if (!generatedPrompt) { onToast("Generate a prompt first", "error"); return; }
+    if (!generatedPrompt) { onToast("Select a template first", "error"); return; }
     navigator.clipboard.writeText(generatedPrompt).then(() => {
       onToast("Prompt copied! Paste it into Claude at claude.ai");
     }).catch(() => {
-      onToast("Copy failed — select the text below and copy manually.", "error");
+      onToast("Copy failed — select the text and copy manually.", "error");
     });
   }
 
-  const DOC_TYPE_LABELS: Record<string, string> = {
-    brand_brief: "Brand Architecture Brief",
-    proposal: "Engagement Proposal",
-    roadmap: "12-Month Roadmap",
-    game_plan: "90-Day Game Plan",
-    analysis: "Brand Intelligence Analysis (SWOT + AEO + PR Strategy)",
-    all: "Full Analysis Suite",
-  };
+  const selectedTemplate = templates.find(t => t.id === selectedId);
 
   return (
     <div>
-      {/* Template selector */}
+      {/* Compact dropdown selector */}
       <div className="panel" style={{ marginBottom: 20 }}>
         <div className="panel-head">
-          <span className="panel-title">⚡ Select Prompt Template</span>
-          <span className="pill pill-purple">BBB Templates</span>
+          <span className="panel-title">⚡ AI Prompt Builder</span>
+          {generatedPrompt && (
+            <button className="btn btn-gold btn-sm" onClick={handleCopy}>
+              Copy to Claude →
+            </button>
+          )}
         </div>
         <div className="panel-body">
-          <p style={{ fontSize: 13, color: "#5a4070", lineHeight: 1.7, marginBottom: 20 }}>
-            Select a template, click <strong>Generate Prompt</strong>, then <strong>Copy to Claude</strong> at claude.ai. All client details, intake data, offer information, and transcript auto-fill into the prompt.
+          <p style={{ fontSize: 13, color: "#5a4070", lineHeight: 1.7, marginBottom: 16 }}>
+            Select a template — the prompt auto-fills with all client, intake, and offer data. Then copy and paste into <a href="https://claude.ai" target="_blank" rel="noopener" style={{ color: "#c9a84c" }}>claude.ai</a>.
           </p>
 
-          {loadingTemplates ? (
-            <p style={{ fontSize: 13, color: "#9a8aaa" }}>Loading templates…</p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
-              {templates.map(t => (
-                <div
-                  key={t.id}
-                  onClick={() => setSelectedTemplate(t)}
-                  style={{
-                    padding: "14px 18px",
-                    borderRadius: 10,
-                    border: `1.5px solid ${selectedTemplate?.id === t.id ? "#c9a84c" : "rgba(240,195,112,0.2)"}`,
-                    background: selectedTemplate?.id === t.id ? "rgba(201,168,76,0.08)" : "#fff",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: selectedTemplate?.id === t.id ? "#c9a84c" : "#ddd", flexShrink: 0 }} />
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#1e0a4a" }}>{t.name}</div>
-                      <div style={{ fontSize: 12, color: "#7a6090", marginTop: 2 }}>
-                        {DOC_TYPE_LABELS[t.doc_type] ?? t.doc_type}
-                        {t.description ? ` · ${t.description}` : ""}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {templates.length === 0 && (
-                <p style={{ fontSize: 13, color: "#9a8aaa", fontStyle: "italic" }}>
-                  No prompt templates found. Check that the database migration ran successfully.
-                </p>
-              )}
+          <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
+            {loadingTemplates ? (
+              <p style={{ fontSize: 13, color: "#9a8aaa" }}>Loading templates…</p>
+            ) : (
+              <select
+                value={selectedId}
+                onChange={e => handleTemplateChange(e.target.value)}
+                style={{ flex: 1, fontSize: 14, fontWeight: 600 }}
+                disabled={generating}
+              >
+                <option value="">Select a prompt template…</option>
+                {templates.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            )}
+            {generating && <span style={{ fontSize: 13, color: "#c9a84c", fontStyle: "italic" }}>Building prompt…</span>}
+          </div>
+
+          {selectedTemplate && (
+            <div style={{ fontSize: 12, color: "#7a6090", padding: "8px 12px", background: "rgba(240,195,112,0.06)", borderRadius: 8 }}>
+              {selectedTemplate.description || `Generates a ${selectedTemplate.doc_type.replace(/_/g, " ")} using your deal + intake data.`}
             </div>
           )}
 
-          <div style={{ display: "flex", gap: 10 }}>
-            <button
-              className="btn btn-gold"
-              onClick={handleGenerate}
-              disabled={generating || !selectedTemplate}
-              style={{ flex: 1 }}
-            >
-              {generating ? "Generating prompt…" : `Generate: ${selectedTemplate?.name ?? "Select a template"}`}
-            </button>
-            {generatedPrompt && (
-              <button className="btn btn-purple" onClick={handleCopy}>
-                Copy to Claude
-              </button>
-            )}
-          </div>
+          {!generatedPrompt && !generating && (
+            <div style={{ marginTop: 16, textAlign: "center", color: "#9a8aaa", fontSize: 13 }}>
+              ↑ Select a template above to auto-generate the prompt
+            </div>
+          )}
         </div>
       </div>
 
