@@ -366,9 +366,66 @@ function IntakeTab({
 }) {
   const [intake, setIntake] = useState<IntakeData>(() => intakeFromJson(deal.intake_data));
   const [saving, setSaving] = useState(false);
+  const [autofillText, setAutofillText] = useState("");
+  const [autofillUrl, setAutofillUrl] = useState("");
+  const [autofilling, setAutofilling] = useState(false);
+  const [showAutofill, setShowAutofill] = useState(false);
 
   function setField(key: keyof IntakeData, value: string) {
     setIntake((prev) => ({ ...prev, [key]: value }));
+  }
+
+  // Auto-fill from deal overview fields
+  function autoFillFromDeal() {
+    setIntake((prev) => ({
+      ...prev,
+      brand_name: prev.brand_name || deal.contact_company || "",
+      founder_name: prev.founder_name || deal.contact_name || "",
+      engagement_type: prev.engagement_type || deal.offer_tier || "",
+    }));
+    onToast("Auto-filled from deal details");
+  }
+
+  async function handleAutofill() {
+    if (!autofillText.trim() && !autofillUrl.trim()) {
+      onToast("Paste a URL or text to auto-fill", "error");
+      return;
+    }
+    setAutofilling(true);
+    try {
+      const res = await fetch("/api/autofill-intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: autofillText,
+          url: autofillUrl,
+          contact_name: deal.contact_name,
+          contact_company: deal.contact_company,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Auto-fill failed");
+      const fields = json.fields as Record<string, string>;
+      // Merge extracted fields (only fill empty ones unless overwrite)
+      setIntake((prev) => {
+        const next = { ...prev };
+        for (const [k, v] of Object.entries(fields)) {
+          if (k in next && v && typeof v === "string") {
+            next[k as keyof IntakeData] = v;
+          }
+        }
+        return next;
+      });
+      const count = Object.keys(fields).length;
+      onToast(`Auto-filled ${count} field${count !== 1 ? "s" : ""} from content!`);
+      setShowAutofill(false);
+      setAutofillText("");
+      setAutofillUrl("");
+    } catch (err: unknown) {
+      onToast(err instanceof Error ? err.message : "Auto-fill failed", "error");
+    } finally {
+      setAutofilling(false);
+    }
   }
 
   async function handleSave() {
@@ -385,43 +442,104 @@ function IntakeTab({
   }
 
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <span className="panel-title">Brand Intelligence Intake</span>
-        <span className="pill pill-purple">JSONB</span>
+    <div>
+      {/* Auto-fill toolbar */}
+      <div className="panel" style={{ marginBottom: 16 }}>
+        <div className="panel-body" style={{ padding: "16px 22px" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <button className="btn btn-outline btn-sm" onClick={autoFillFromDeal}>
+              ↑ Auto-fill from Deal
+            </button>
+            <button
+              className="btn btn-purple btn-sm"
+              onClick={() => setShowAutofill(!showAutofill)}
+            >
+              ✦ AI Auto-fill from URL or Text
+            </button>
+            <span style={{ fontSize: 12, color: "#8a7a9a", fontStyle: "italic" }}>
+              Paste a website URL, LinkedIn, transcript, or brief — AI extracts and fills all fields
+            </span>
+          </div>
+
+          {showAutofill && (
+            <div style={{ marginTop: 16, padding: 16, background: "rgba(30,10,74,0.04)", borderRadius: 10, border: "1px solid rgba(201,168,76,0.15)" }}>
+              <div style={{ marginBottom: 12 }}>
+                <label>Website URL (optional)</label>
+                <input
+                  type="url"
+                  value={autofillUrl}
+                  onChange={(e) => setAutofillUrl(e.target.value)}
+                  placeholder="https://clientwebsite.com"
+                />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label>Paste Text, Bio, or Transcript (optional)</label>
+                <textarea
+                  rows={5}
+                  value={autofillText}
+                  onChange={(e) => setAutofillText(e.target.value)}
+                  placeholder="Paste LinkedIn bio, website copy, call transcript, or any description of the client/brand..."
+                />
+              </div>
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button className="btn btn-outline btn-sm" onClick={() => setShowAutofill(false)}>Cancel</button>
+                <button
+                  className="btn btn-gold"
+                  onClick={handleAutofill}
+                  disabled={autofilling || (!autofillText.trim() && !autofillUrl.trim())}
+                >
+                  {autofilling ? "Extracting…" : "Extract & Fill Fields"}
+                </button>
+              </div>
+              {!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes("uunylac") && (
+                <p style={{ fontSize: 11, color: "#9a8aaa", marginTop: 10 }}>
+                  Add ANTHROPIC_API_KEY to Vercel env vars for AI extraction. Without it, basic extraction is used.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-      <div className="panel-body">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          {INTAKE_FIELDS.map(({ key, label, long }) =>
-            long ? null : (
+
+      {/* Intake form */}
+      <div className="panel">
+        <div className="panel-head">
+          <span className="panel-title">Brand Intelligence Intake</span>
+          <span className="pill pill-purple">Gap Session Data</span>
+        </div>
+        <div className="panel-body">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            {INTAKE_FIELDS.map(({ key, label, long }) =>
+              long ? null : (
+                <div key={key}>
+                  <label>{label}</label>
+                  <input
+                    value={intake[key]}
+                    onChange={(e) => setField(key, e.target.value)}
+                    placeholder={label}
+                  />
+                </div>
+              )
+            )}
+          </div>
+          <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 14 }}>
+            {INTAKE_FIELDS.filter((f) => f.long).map(({ key, label }) => (
               <div key={key}>
                 <label>{label}</label>
-                <input
+                <textarea
+                  rows={3}
                   value={intake[key]}
                   onChange={(e) => setField(key, e.target.value)}
                   placeholder={label}
                 />
               </div>
-            )
-          )}
-        </div>
-        <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 14 }}>
-          {INTAKE_FIELDS.filter((f) => f.long).map(({ key, label }) => (
-            <div key={key}>
-              <label>{label}</label>
-              <textarea
-                rows={3}
-                value={intake[key]}
-                onChange={(e) => setField(key, e.target.value)}
-                placeholder={label}
-              />
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 18, display: "flex", justifyContent: "flex-end" }}>
-          <button className="btn btn-gold" onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : "Save Intake"}
-          </button>
+            ))}
+          </div>
+          <div style={{ marginTop: 18, display: "flex", justifyContent: "flex-end" }}>
+            <button className="btn btn-gold" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : "Save Intake"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -450,6 +568,7 @@ function DocumentsTab({
   onDocGenerated: (docType: DocKey, html: string) => void;
 }) {
   const [generating, setGenerating] = useState<DocKey | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ html: string; label: string } | null>(null);
 
   async function handleGenerate(docType: DocKey) {
     setGenerating(docType);
@@ -496,10 +615,9 @@ function DocumentsTab({
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 {html && (
-                  <button className="btn btn-outline btn-sm" onClick={() => {
-                    const w = window.open("", "_blank");
-                    if (w) { w.document.write(html); w.document.close(); }
-                  }}>Preview</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => setPreviewDoc({ html, label })}>
+                    Preview
+                  </button>
                 )}
                 <button
                   className="btn btn-gold btn-sm"
@@ -512,8 +630,13 @@ function DocumentsTab({
             </div>
             <div className="panel-body">
               {html ? (
-                <div style={{ border: "1px solid rgba(240,195,112,0.2)", borderRadius: 10, padding: "16px 20px", background: "rgba(255,255,255,0.6)", fontSize: 13, color: "#2a1a40", lineHeight: 1.7, maxHeight: 300, overflowY: "auto", position: "relative" }}>
-                  <div dangerouslySetInnerHTML={{ __html: html.slice(0, 1200) + (html.length > 1200 ? "…" : "") }} />
+                <div style={{ border: "1px solid rgba(240,195,112,0.2)", borderRadius: 10, padding: "16px 20px", background: "rgba(255,255,255,0.6)", fontSize: 13, color: "#2a1a40", lineHeight: 1.7, maxHeight: 220, overflowY: "hidden", position: "relative", cursor: "pointer" }}
+                  onClick={() => setPreviewDoc({ html, label })}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: html.slice(0, 800) + (html.length > 800 ? "…" : "") }} />
+                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(transparent, rgba(255,255,255,0.9))", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: "#c9a84c", fontWeight: 600 }}>Click to preview full document</span>
+                  </div>
                 </div>
               ) : (
                 <div style={{ textAlign: "center", padding: "28px 0", color: "#8a7a9a" }}>
@@ -525,6 +648,43 @@ function DocumentsTab({
           </div>
         );
       })}
+
+      {/* Full-screen preview modal */}
+      {previewDoc && (
+        <div className="modal-overlay" onClick={() => setPreviewDoc(null)}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width: "92vw", height: "90vh", background: "#fff", borderRadius: 16, overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(30,10,74,0.3)" }}
+          >
+            {/* Modal header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", borderBottom: "1px solid rgba(240,195,112,0.2)", background: "#fff", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span className="panel-title">{previewDoc.label}</span>
+                <span className="pill pill-green" style={{ fontSize: 10 }}>Generated</span>
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button className="btn btn-outline btn-sm" onClick={() => {
+                  const blob = new Blob([previewDoc.html], { type: "text/html" });
+                  const a = document.createElement("a");
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `${previewDoc.label.replace(/\s+/g, "_")}.html`;
+                  a.click();
+                }}>Download HTML</button>
+                <button onClick={() => setPreviewDoc(null)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#5a4070", lineHeight: 1 }}>✕</button>
+              </div>
+            </div>
+            {/* Document content */}
+            <div style={{ flex: 1, overflow: "auto", padding: 0 }}>
+              <iframe
+                srcDoc={previewDoc.html}
+                style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                title={previewDoc.label}
+                sandbox="allow-same-origin"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -739,6 +899,7 @@ export default function DealDetailPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [convertingToProject, setConvertingToProject] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   function showToast(msg: string, type: "success" | "error" = "success") {
@@ -774,6 +935,56 @@ export default function DealDetailPage() {
     setDeleting(false);
     if (error) { showToast("Delete failed: " + error.message, "error"); setShowDeleteConfirm(false); return; }
     router.push("/dashboard/pipeline");
+  }
+
+  async function handleConvertToProject() {
+    if (!deal) return;
+    setConvertingToProject(true);
+    try {
+      const supabase = createClient();
+      // Find a matching project template based on offer type
+      const { data: templates } = await supabase
+        .from("project_templates")
+        .select("id, name, tasks, offer_type")
+        .order("name");
+
+      const offerType = deal.offer_templates?.offer_type ?? deal.offer_tier ?? "";
+      const matchedTemplate = templates?.find(t => t.offer_type === offerType) || templates?.[0];
+
+      // Create the project
+      const { data: project, error } = await supabase.from("projects").insert({
+        name: `${deal.contact_name} — ${deal.offer_templates?.name ?? deal.offer_tier ?? "Project"}`,
+        description: `Created from Pipeline deal. ${deal.notes || ""}`.trim(),
+        deal_id: deal.id,
+        status: "planning",
+        start_date: new Date().toISOString().slice(0, 10),
+      }).select("id").single();
+
+      if (error) throw error;
+
+      // If template found, seed tasks
+      if (matchedTemplate && project && Array.isArray(matchedTemplate.tasks)) {
+        const tasks = (matchedTemplate.tasks as Array<{ title: string; description?: string; sort_order: number; subtasks?: Array<{ title: string; sort_order: number }> }>)
+          .map(t => ({
+            project_id: project.id,
+            title: t.title,
+            description: t.description || null,
+            status: "todo",
+            priority: "medium",
+            sort_order: t.sort_order,
+          }));
+        if (tasks.length > 0) {
+          await supabase.from("tasks").insert(tasks);
+        }
+      }
+
+      showToast(`Project created! Redirecting…`);
+      setTimeout(() => router.push(`/dashboard/projects/${project?.id}`), 1200);
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : "Failed to create project", "error");
+    } finally {
+      setConvertingToProject(false);
+    }
   }
 
   function handleDealSaved(updated: PipelineDeal) {
@@ -924,6 +1135,32 @@ export default function DealDetailPage() {
           justifyContent: "space-between",
         }}
       >
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#1e0a4a" }}>Convert to Project</div>
+          <div style={{ fontSize: 12, color: "#5a4070", marginTop: 2 }}>
+            Create a project from this deal with tasks auto-populated from the matching project template.
+          </div>
+        </div>
+        <button
+          className="btn btn-purple"
+          onClick={handleConvertToProject}
+          disabled={convertingToProject}
+        >
+          {convertingToProject ? "Creating…" : "◆ Convert to Project"}
+        </button>
+      </div>
+
+      {/* Delete danger zone */}
+      <div style={{
+        marginTop: 16,
+        padding: "20px 24px",
+        background: "rgba(255,240,240,0.5)",
+        border: "1px solid rgba(220,100,100,0.2)",
+        borderRadius: 12,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: "#8a2020" }}>Delete this deal</div>
           <div style={{ fontSize: 12, color: "#a06060", marginTop: 2 }}>
